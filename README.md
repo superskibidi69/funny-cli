@@ -13,19 +13,61 @@ bahoot banner && bahoot
 
 For Zsh, replace `.bashrc` with `.zshrc`.
 
+
 ## Windows (PowerShell)
+Open PowerShell and run:
 ```powershell
 mkdir "$env:USERPROFILE\.bahoot\bin"
-Invoke-WebRequest https://raw.githubusercontent.com/superskibidi69/funny-cli/main/bahoot.ps1 -OutFile "$env:USERPROFILE\.bahoot\bin\bahoot.ps1"
+curl -o "$env:USERPROFILE\.bahoot\bin\bahoot.ps1" https://raw.githubusercontent.com/superskibidi69/funny-cli/main/bahoot.ps1
 echo "@echo off" > "$env:USERPROFILE\.bahoot\bin\bahoot.cmd"
 echo "powershell -ExecutionPolicy Bypass -File \"%USERPROFILE%\.bahoot\bin\bahoot.ps1\" %*" >> "$env:USERPROFILE\.bahoot\bin\bahoot.cmd"
 setx PATH "%USERPROFILE%\.bahoot\bin;%PATH%"
+```
+Restart your terminal, then run:
+```powershell
 bahoot banner
 bahoot
 ```
 
+
 ## Windows (CMD)
-After installing as above, you can run `bahoot` from CMD. It will auto-detect and use PowerShell for Windows features.
+
+### Step-by-step CMD Install Instructions
+
+1. Open CMD (not PowerShell).
+2. Run the following commands one by one:
+
+```cmd
+REM Create Bahoot directory
+mkdir "%USERPROFILE%\.bahoot\bin"
+
+REM Download Bahoot PowerShell script
+REM (Requires curl, or download manually from GitHub)
+curl -o "%USERPROFILE%\.bahoot\bin\bahoot.ps1" https://raw.githubusercontent.com/superskibidi69/funny-cli/main/bahoot.ps1
+
+REM Create CMD wrapper
+copy nul "%USERPROFILE%\.bahoot\bin\bahoot.cmd"
+echo @echo off > "%USERPROFILE%\.bahoot\bin\bahoot.cmd"
+echo powershell -ExecutionPolicy Bypass -File "%%USERPROFILE%%\.bahoot\bin\bahoot.ps1" %%* >> "%USERPROFILE%\.bahoot\bin\bahoot.cmd"
+
+REM Add Bahoot to PATH
+setx PATH "%USERPROFILE%\.bahoot\bin;%PATH%"
+
+REM Restart CMD to reload PATH
+```
+
+3. Now you can run Bahoot from CMD:
+```cmd
+bahoot banner
+bahoot
+```
+
+### Notes & Troubleshooting
+- If curl is not available, download bahoot.ps1 manually from GitHub and place it in the directory above.
+- If you see 'bahoot is not recognized', make sure you restarted CMD and PATH is set correctly.
+- If you see 'Invoke-WebRequest is not recognized', use `curl` or download manually from GitHub.
+- If you see 'The filename, directory name, or volume label syntax is incorrect', check for correct Windows path syntax (use `%USERPROFILE%` not `$env:USERPROFILE`).
+- Bahoot requires PowerShell to be installed (Windows 10+ includes it by default).
 
 ## Updating Bahoot
 Once installed, update anytime with:
