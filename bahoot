@@ -1,12 +1,20 @@
 # 🦑 Squid mode
 squid() {
   echo -e "${CYAN}🦑 Squid mode activated!${NC}"
-  for i in {1..10}; do
-    echo -e "${GREEN}Splatooning...${NC}"
-    sleep 0.1
-    echo -e "${YELLOW}Ink everywhere!${NC}"
-    sleep 0.1
-    clear
+  squid_frames=(
+    "    ___\n   /   \\\n  | o o |\n   \\_-_/\n    |||\n   /|||\\\n  ( ||| )\n   \\|||/\n    vvv"
+    "    ___\n   /   \\\n  | ^ ^ |\n   \\_-_/\n    |||\n   /|||\\\n  ( ||| )\n   \\|||/\n    ^^^  "
+    "    ___\n   /   \\\n  | - - |\n   \\_u_/\n    |||\n   /|||\\\n  ( ||| )\n   \\|||/\n    ~~~"
+    "    ___\n   /   \\\n  | o o |\n   \\_-_/\n    |||\n   \\|||/\n  ( ||| )\n   /|||\\\n    ^^^  "
+  )
+  
+  for cycle in {1..3}; do
+    for frame in "${squid_frames[@]}"; do
+      clear
+      echo -e "${CYAN}$frame${NC}"
+      echo -e "\n${GREEN}~ Swimming through the depths ~${NC}"
+      sleep 0.4
+    done
   done
   echo -e "${CYAN}🦑 Squid out!${NC}"
 }
@@ -14,20 +22,49 @@ squid() {
 # 🦆 Duck spam
 duck() {
   echo -e "${YELLOW}Quack! Quack! Quack!${NC}"
-  for i in {1..20}; do
-    echo -e "🦆 Quack $i!"
-    sleep 0.05
+  duck_frames=(
+    "       __\n      (o >\n   \\_\\_\\)#_)\n~~~~~~~~~~~~~~~~~~~~~~~~"
+    "       __\n      (o<\n   \\_\\_\\)#_)\n~~~~~~~~~~~~~~~~~~~~~~~~"
+    "       __\n      (o >\n   \\_\\_\\)#_)  *splash*\n~~~~~~~~~~~~~~~~~~~~~~~~"
+    "       __\n      (^ >\n   \\_\\_\\)#_)\n~~~~~~~~~~~~~~~~~~~~~~~~"
+  )
+  
+  positions=(5 10 15 20 25 30 20 15 10 5)
+  
+  for cycle in {1..2}; do
+    for pos in "${positions[@]}"; do
+      clear
+      echo
+      for ((i=0; i<pos; i++)); do echo -n " "; done
+      echo -e "${YELLOW}${duck_frames[$((cycle % 4))]}${NC}"
+      echo -e "\n${GREEN}Quack! Swimming around the pond!${NC}"
+      sleep 0.3
+    done
   done
-  echo -e "${GREEN}All ducks have quacked.${NC}"
+  echo -e "${GREEN}All ducks have swum away.${NC}"
 }
 
 # 🦀 Crab rave
 crab() {
   echo -e "${CYAN}🦀 Crab rave started!${NC}"
-  for i in {1..15}; do
-    echo -e "🦀 $(seq -s ' ' 1 $((i%6+1)))"
-    sleep 0.1
-    clear
+  crab_frames=(
+    "   \\o/  \\o/\n    |    |\n  _/ \\__/ \\_\n {.  \\_/  .}\n  \\._    _./\n     |  |\n    /    \\"
+    "   \\o|  |o/\n    |    |\n  _/ \\__/ \\_\n {.  \\_/  .}\n  \\._    _./\n     |  |\n    /    \\"
+    "   /o\\  /o\\\n    |    |\n  _/ \\__/ \\_\n {.  \\_/  .}\n  \\._    _./\n     |  |\n    /    \\"
+    "   |o/  \\o|\n    |    |\n  _/ \\__/ \\_\n {.  \\_/  .}\n  \\._    _./\n     |  |\n    /    \\"
+  )
+  
+  positions=(2 8 15 22 28 35 28 22 15 8 2)
+  
+  for cycle in {1..2}; do
+    for pos in "${positions[@]}"; do
+      clear
+      echo
+      for ((i=0; i<pos; i++)); do echo -n " "; done
+      echo -e "${RED}${crab_frames[$((cycle % 4))]}${NC}"
+      echo -e "\n${YELLOW}🎵 Crab rave! Moving sideways! 🎵${NC}"
+      sleep 0.4
+    done
   done
   echo -e "${GREEN}Crab rave ended.${NC}"
 }
