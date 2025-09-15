@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-REPO="seas/bahoot-cli"
+REPO="superskibidi/funny-cli"
 echo "📦 Installing Bahoot CLI..."
 
 if ! command -v node &> /dev/null || ! command -v npm &> /dev/null; then
