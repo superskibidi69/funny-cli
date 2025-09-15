@@ -18,7 +18,7 @@ loader() {
   echo ""
 }
 
-# 🔥 ASCII rocket launch
+# 🚀 ASCII rocket launch
 rocket() {
   frames=("🚀" "🚀💨" "🚀     💨" "🚀         💨" "🚀             💨" "🚀                 💥")
   for frame in "${frames[@]}"; do
@@ -53,7 +53,7 @@ prank() {
   echo "Just kidding 😎"
 }
 
-# 🧨 Chaos mode: scrolling ASCII
+# 🧨 Chaos mode
 chaos() {
   echo -e "${CYAN}🧨 Entering chaos mode...${NC}"
   sleep 0.5
@@ -73,19 +73,23 @@ matrix() {
   done
   echo -e "${GREEN}🧠 Matrix exited.${NC}"
 }
-
-# 🎨 ASCII banner
 banner() {
-  echo -e "${CYAN}"
-  echo "██████╗  █████╗ ██╗  ██╗ ██████╗  ██████╗ ████████╗"
-  echo "██╔══██╗██╔══██╗██║ ██╔╝██╔═══██╗██╔═══██╗╚══██╔══╝"
-  echo "██████╔╝███████║█████╔╝ ██║   ██║██║   ██║   ██║   "
-  echo "██╔═══╝ ██╔══██║██╔═██╗ ██║   ██║██║   ██║   ██║   "
-  echo "██║     ██║  ██║██║  ██╗╚██████╔╝╚██████╔╝   ██║   "
-  echo "╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝   "
-  echo -e "${NC}"
+  local lines=(
+" ______  _______ _     _  _____   _____  _______"
+" |_____] |_____| |_____| |     | |     |    |   "
+" |_____] |     | |     | |_____| |_____|    |   "
+  )
+  clear
+  for line in "${lines[@]}"; do
+    # print each character with a short delay for a typewriter effect
+    for ((i=0; i<${#line}; i++)); do
+      echo -ne "${CYAN}${line:$i:1}${NC}"
+      sleep 0.01
+    done
+    echo ""  # new line after each banner line
+    sleep 0.15
+  done
 }
-
 # 🔄 Self-update
 update() {
   echo -e "${CYAN}🔄 Updating Bahoot CLI...${NC}"
@@ -169,7 +173,7 @@ glitch() {
 # 🖼️ Random ASCII art
 ascii() {
   echo -e "${CYAN}🖼️ Here's some ASCII art:${NC}"
-  echo "¯\_(ツ)_/¯"
+  echo "¯\\_(ツ)_/¯"
   echo "(╯°□°）╯︵ ┻━┻"
   echo "ʕ•ᴥ•ʔ"
 }
@@ -193,7 +197,7 @@ clear_cmd() {
 
 # 📜 Credits
 credits() {
-  echo -e "${CYAN}📜 Bahoot CLI was built by a person."
+  echo -e "${CYAN}📜 Bahoot CLI was built by Seas & Copilot.${NC}"
   echo "Inspired by chaos, crafted with shell magic."
 }
 
@@ -225,12 +229,12 @@ help_menu() {
 # 🎭 Subcommand handler
 case "$1" in
   prank) prank ;;
-  deploy) deploy ;;
+  deploy) rocket ;;
   chaos) chaos ;;
+  matrix) matrix ;;
   doctor) doctor ;;
   banner) banner ;;
-  matrix) matrix ;;
-    update) update ;;
+  update) update ;;
   self-destruct) self_destruct ;;
   troll) troll ;;
   party) party ;;
@@ -246,5 +250,4 @@ case "$1" in
   help|"") help_menu ;;
   *) help_menu ;;
 esac
-
-  
+[ "$1" == "" ] && echo -e "${GREEN}✅ Bahoot CLI installed successfully!${NC}" && { banner; help_menu; }
