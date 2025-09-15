@@ -253,4 +253,3 @@ case "$1" in
     ;;
   * ) help_menu ;;
 esac
-[ "$1" == "" ] && echo -e "${GREEN}✅ Bahoot CLI installed successfully!${NC}" && { banner; help_menu; }
