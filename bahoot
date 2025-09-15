@@ -1,6 +1,30 @@
 #!/bin/bash
 set -e
 
+# OS detection
+detect_os() {
+  case "$(uname -s)" in
+    Linux*)   OS=Linux ;;
+    Darwin*)  OS=Mac ;;
+    CYGWIN*|MINGW*|MSYS*) OS=Windows ;;
+    *)        OS=Unknown ;;
+  esac
+}
+
+# Windows fallback
+windows_fallback() {
+  echo -e "\033[0;31mBahoot CLI requires Bash.\033[0m"
+  echo "You appear to be running in Windows CMD or PowerShell."
+  echo "Please use Git Bash, WSL, or a Bash-compatible terminal."
+  echo "Download Git Bash: https://git-scm.com/download/win"
+
+    # Try to run PowerShell version if available
+    if command -v powershell.exe >/dev/null 2>&1; then
+      powershell.exe -ExecutionPolicy Bypass -File "$(dirname "$0")/bahoot.ps1" "$@"
+      exit $?
+    fi
+}
+
 # 🎨 Terminal colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -20,12 +44,30 @@ loader() {
 
 # 🚀 ASCII rocket launch
 rocket() {
-  frames=("🚀" "🚀💨" "🚀     💨" "🚀         💨" "🚀             💨" "🚀                 💥")
-  for frame in "${frames[@]}"; do
+  cols=$(tput cols)
+  rocket="🚀"
+  gas="💨"
+  explosion="💥"
+  rocket_len=2
+  max_pos=$((cols-rocket_len-1))
+  for ((i=0; i<=max_pos; i++)); do
     clear
-    echo -e "${YELLOW}$frame${NC}"
-    sleep 0.2
+    line=""
+    # Draw gas trail behind rocket
+    for ((j=0; j<i; j++)); do line+="$gas"; done
+    # Draw rocket
+    line+="$rocket"
+    # Draw spaces after rocket (to fill line)
+    for ((j=0; j<cols-i-rocket_len; j++)); do line+=" "; done
+    # Draw explosion at end
+    if ((i == max_pos)); then
+      line+="$explosion"
+    fi
+    echo -e "${YELLOW}${line}${NC}"
+    speed=$(echo "scale=3; 0.18 - ($i/$max_pos)*0.13" | bc)
+    sleep $speed
   done
+  echo -e "${GREEN}Rocket launch complete!${NC}"
 }
 
 # 🧠 Diagnostic scanner
@@ -208,12 +250,22 @@ hack() {
 
 # ⚡ Glitch effect
 glitch() {
-  for i in {1..10}; do
-    echo -e "${RED}█▓▒░ GLITCH ░▒▓█${NC}"
-    sleep 0.1
+  chars="█▓▒░@#$%^&*()[]{}<>~ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+  cols=$(tput cols)
+  for i in {1..15}; do
     clear
+    for j in {1..8}; do
+      len=$((10 + RANDOM % cols))
+      str=""
+      for ((k=0; k<len; k++)); do
+        str+="${chars:RANDOM%${#chars}:1}"
+      done
+      color=$((31 + RANDOM % 7))
+      echo -e "\033[1;${color}m${str}${NC}"
+    done
+    sleep 0.07
   done
-  echo "System stabilized."
+  echo -e "${GREEN}System stabilized.${NC}"
 }
 
 ball() {
