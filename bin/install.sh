@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-REPO="superskibidi/funny-cli"
+REPO="https://github.com/superskibidi69/funny-cli.git"
 echo "📦 Installing Bahoot CLI..."
 
 if ! command -v node &> /dev/null || ! command -v npm &> /dev/null; then
@@ -9,6 +9,6 @@ if ! command -v node &> /dev/null || ! command -v npm &> /dev/null; then
   exit 1
 fi
 
-npm install -g "https://github.com/$REPO.git"
+npm install -g "$REPO"
 
 echo "✅ Installed! Run 'bahoot' to get started."
