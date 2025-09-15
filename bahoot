@@ -20,14 +20,7 @@ loader() {
 
 # 🔥 ASCII rocket launch
 rocket() {
-  frames=(
-"🚀"
-"🚀💨"
-"🚀     💨"
-"🚀         💨"
-"🚀             💨"
-"🚀                 💥"
-  )
+  frames=("🚀" "🚀💨" "🚀     💨" "🚀         💨" "🚀             💨" "🚀                 💥")
   for frame in "${frames[@]}"; do
     clear
     echo -e "${YELLOW}$frame${NC}"
@@ -53,8 +46,10 @@ prank() {
   sleep 0.5
   echo "Kernel panic: unexpected token 'bahoot'"
   sleep 0.5
-  echo "Dumping memory..."
-  sleep 0.5
+  echo -e "${YELLOW} Dumping memory..."
+  sleep 4.5
+  echo -e "${RED} Memory dumped.${NC}"
+  sleep 2
   echo "Just kidding 😎"
 }
 
@@ -69,21 +64,162 @@ chaos() {
   echo -e "${CYAN}💫 Chaos complete.${NC}"
 }
 
-# 🚀 Deploy animation
-deploy() {
+# 🧪 Matrix mode
+matrix() {
+  echo -e "${GREEN}🧪 Entering matrix mode...${NC}"
+  for i in {1..30}; do
+    echo "$(cat /dev/urandom | tr -dc '01' | fold -w 80 | head -n 1)"
+    sleep 0.05
+  done
+  echo -e "${GREEN}🧠 Matrix exited.${NC}"
+}
+
+# 🎨 ASCII banner
+banner() {
+  echo -e "${CYAN}"
+  echo "██████╗  █████╗ ██╗  ██╗ ██████╗  ██████╗ ████████╗"
+  echo "██╔══██╗██╔══██╗██║ ██╔╝██╔═══██╗██╔═══██╗╚══██╔══╝"
+  echo "██████╔╝███████║█████╔╝ ██║   ██║██║   ██║   ██║   "
+  echo "██╔═══╝ ██╔══██║██╔═██╗ ██║   ██║██║   ██║   ██║   "
+  echo "██║     ██║  ██║██║  ██╗╚██████╔╝╚██████╔╝   ██║   "
+  echo "╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝    ╚═╝   "
+  echo -e "${NC}"
+}
+
+# 🔄 Self-update
+update() {
+  echo -e "${CYAN}🔄 Updating Bahoot CLI...${NC}"
+  curl -fsSL https://raw.githubusercontent.com/superskibidi69/funny-cli/main/bahoot -o "$0"
+  chmod +x "$0"
+  echo -e "${GREEN}✅ Update complete!${NC}"
+}
+
+# 💣 Self-destruct
+self_destruct() {
+  echo -e "${RED}💣 Self-destruct sequence initiated...${NC}"
+  sleep 1
+  echo "Deleting Bahoot CLI from: $0"
+  rm -- "$0"
+}
+
+# 🎭 Troll mode
+troll() {
   loader
-  rocket
-  echo -e "${GREEN}🚀 Bahoot deployed successfully!${NC}"
+  messages=("Installing virus..." "Formatting disk..." "Sending your IP to Bahoot HQ..." "Just kidding 😎")
+  for msg in "${messages[@]}"; do
+    echo -e "${RED}$msg${NC}"
+    sleep 0.5
+  done
+}
+
+# 🎉 Party mode
+party() {
+  echo -e "${YELLOW}🎉 Welcome to Bahoot Party Mode!${NC}"
+  for i in {1..10}; do
+    echo -e "${CYAN}🎊 🎈 🎉 Bahoot rocks! 🎉 🎈 🎊${NC}"
+    sleep 0.2
+  done
+}
+
+# 🦠 Fake virus scan
+scan() {
+  echo -e "${RED}🦠 Scanning system for viruses...${NC}"
+  sleep 1
+  echo "Found: 3 threats"
+  sleep 1
+  echo "Threat 1: Bahoot overload"
+  echo "Threat 2: Excessive swag"
+  echo "Threat 3: Terminal too cool"
+  echo -e "${GREEN}✅ All threats neutralized.${NC}"
+}
+
+# 🖥️ Boot sequence
+boot() {
+  echo -e "${CYAN}🖥️ Booting Bahoot OS...${NC}"
+  sleep 0.5
+  echo "Initializing kernel..."
+  sleep 0.5
+  echo "Loading modules..."
+  sleep 0.5
+  echo "Mounting /bahoot..."
+  sleep 0.5
+  echo "Welcome to Bahoot OS 🤖"
+}
+
+# 💻 Fake hacking
+hack() {
+  echo -e "${GREEN}💻 Hacking in progress...${NC}"
+  for i in {1..20}; do
+    echo "Accessing node $i... success"
+    sleep 0.1
+  done
+  echo -e "${RED}🔥 Firewall breached. Just kidding.${NC}"
+}
+
+# ⚡ Glitch effect
+glitch() {
+  for i in {1..10}; do
+    echo -e "${RED}█▓▒░ GLITCH ░▒▓█${NC}"
+    sleep 0.1
+    clear
+  done
+  echo "System stabilized."
+}
+
+# 🖼️ Random ASCII art
+ascii() {
+  echo -e "${CYAN}🖼️ Here's some ASCII art:${NC}"
+  echo "¯\_(ツ)_/¯"
+  echo "(╯°□°）╯︵ ┻━┻"
+  echo "ʕ•ᴥ•ʔ"
+}
+
+# 🍀 Fortune
+fortune() {
+  quotes=("You will write bug-free code today." "Bahoot believes in you." "Your terminal is your canvas." "Don't forget to hydrate.")
+  echo -e "${GREEN}🍀 Fortune:${NC} ${quotes[$RANDOM % ${#quotes[@]}]}"
+}
+
+# 🔊 Echo with flair
+echo_cmd() {
+  echo -e "${CYAN}🔊 You said:${NC} $*"
+}
+
+# 🧼 Clear screen
+clear_cmd() {
+  clear
+  echo -e "${GREEN}🧼 Screen cleared.${NC}"
+}
+
+# 📜 Credits
+credits() {
+  echo -e "${CYAN}📜 Bahoot CLI was built by a person."
+  echo "Inspired by chaos, crafted with shell magic."
 }
 
 # 🧼 Help menu
 help_menu() {
   echo -e "${CYAN}Bahoot CLI 🤖 — Available commands:${NC}"
-  echo "  prank     - Trigger a fake meltdown"
-  echo "  deploy    - Launch ASCII rocket"
-  echo "  chaos     - Enter chaos mode"
-  echo "  doctor    - Run environment diagnostics"
-  echo "  help      - Show this menu"
+  echo "  prank          - Trigger a fake meltdown"
+  echo "  deploy         - Launch ASCII rocket"
+  echo "  chaos          - Enter chaos mode"
+  echo "  matrix         - Scroll binary like The Matrix"
+  echo "  doctor         - Run environment diagnostics"
+  echo "  banner         - Print Bahoot ASCII logo"
+  echo "  update         - Refresh CLI from GitHub"
+  echo "  self-destruct  - Delete Bahoot CLI dramatically"
+  echo "  troll          - Print fake errors"
+  echo "  party          - Celebrate with confetti"
+  echo "  scan           - Fake virus scan"
+  echo "  boot           - Simulate OS boot"
+  echo "  hack           - Fake hacking animation"
+  echo "  glitch         - Terminal distortion effect"
+  echo "  ascii          - Print random ASCII art"
+  echo "  fortune        - Get a random quote"
+  echo "  echo [text]    - Repeat your input"
+  echo "  clear          - Clear the screen"
+  echo "  credits        - Show CLI credits"
+  echo "  help           - Show this menu"
 }
 
 # 🎭 Subcommand handler
@@ -92,5 +228,23 @@ case "$1" in
   deploy) deploy ;;
   chaos) chaos ;;
   doctor) doctor ;;
-  help|*) help_menu ;;
+  banner) banner ;;
+  matrix) matrix ;;
+    update) update ;;
+  self-destruct) self_destruct ;;
+  troll) troll ;;
+  party) party ;;
+  scan) scan ;;
+  boot) boot ;;
+  hack) hack ;;
+  glitch) glitch ;;
+  ascii) ascii ;;
+  fortune) fortune ;;
+  echo) shift; echo_cmd "$@" ;;
+  clear) clear_cmd ;;
+  credits) credits ;;
+  help|"") help_menu ;;
+  *) help_menu ;;
 esac
+
+  
