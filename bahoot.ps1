@@ -1,9 +1,18 @@
 # Bahoot PowerShell — Full Feature Port
 param(
-    [string]$Command = "help",
-    [Parameter(ValueFromRemainingArguments=$true)]
-    [string[]]$Args
-)
+
+# Parse arguments for CMD compatibility
+if ($args.Count -eq 0) {
+    $Command = "help"
+    $Args = @()
+} else {
+    $Command = $args[0]
+    if ($args.Count -gt 1) {
+        $Args = $args[1..($args.Count-1)]
+    } else {
+        $Args = @()
+    }
+}
 
 # Helper: Write colored text
 function Write-Colored($Text, $Color) {
