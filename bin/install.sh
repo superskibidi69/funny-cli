@@ -9,6 +9,6 @@ if ! command -v node &> /dev/null || ! command -v npm &> /dev/null; then
   exit 1
 fi
 
-npm install -g "npm install -g git+https://github.com/superskibidi/funny-cli.git"
+npm install -g "https://github.com/$REPO.git"
 
 echo "✅ Installed! Run 'bahoot' to get started."
