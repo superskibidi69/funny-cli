@@ -38,21 +38,12 @@ bahoot
 2. Run the following commands one by one:
 
 ```cmd
-REM Create Bahoot directory
 mkdir "%USERPROFILE%\.bahoot\bin"
-
-REM Download Bahoot PowerShell script
-REM (Requires curl, or download manually from GitHub)
 curl -o "%USERPROFILE%\.bahoot\bin\bahoot.ps1" https://raw.githubusercontent.com/superskibidi69/funny-cli/main/bahoot.ps1
-
-REM Create CMD wrapper
 copy nul "%USERPROFILE%\.bahoot\bin\bahoot.cmd"
 echo @echo off > "%USERPROFILE%\.bahoot\bin\bahoot.cmd"
 echo powershell -ExecutionPolicy Bypass -File "%%USERPROFILE%%\.bahoot\bin\bahoot.ps1" %%* >> "%USERPROFILE%\.bahoot\bin\bahoot.cmd"
-
-REM Add Bahoot to PATH
 setx PATH "%USERPROFILE%\.bahoot\bin;%PATH%"
-
 REM Restart CMD to reload PATH
 ```
 
