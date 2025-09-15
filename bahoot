@@ -1,3 +1,46 @@
+# 🦑 Squid mode
+squid() {
+  echo -e "${CYAN}🦑 Squid mode activated!${NC}"
+  for i in {1..10}; do
+    echo -e "${GREEN}Splatooning...${NC}"
+    sleep 0.1
+    echo -e "${YELLOW}Ink everywhere!${NC}"
+    sleep 0.1
+    clear
+  done
+  echo -e "${CYAN}🦑 Squid out!${NC}"
+}
+
+# 🦆 Duck spam
+duck() {
+  echo -e "${YELLOW}Quack! Quack! Quack!${NC}"
+  for i in {1..20}; do
+    echo -e "🦆 Quack $i!"
+    sleep 0.05
+  done
+  echo -e "${GREEN}All ducks have quacked.${NC}"
+}
+
+# 🦀 Crab rave
+crab() {
+  echo -e "${CYAN}🦀 Crab rave started!${NC}"
+  for i in {1..15}; do
+    echo -e "🦀 $(seq -s ' ' 1 $((i%6+1)))"
+    sleep 0.1
+    clear
+  done
+  echo -e "${GREEN}Crab rave ended.${NC}"
+}
+
+# 🐸 Frog rain
+frog() {
+  echo -e "${GREEN}🐸 Frog rain incoming...${NC}"
+  for i in {1..20}; do
+    echo -e "🐸" | fold -w $((RANDOM % 10 + 1))
+    sleep 0.07
+  done
+  echo -e "${CYAN}Frogs gone!${NC}"
+}
 #!/bin/bash
 set -e
 
@@ -42,15 +85,18 @@ doctor() {
 # 💥 Fake meltdown
 prank() {
   loader
-  echo -e "${RED}💥 SYSTEM FAILURE DETECTED${NC}"
-  sleep 0.5
-  echo "Kernel panic: unexpected token 'bahoot'"
-  sleep 0.5
-  echo -e "${YELLOW} Dumping memory..."
-  sleep 4.5
+  for i in {1..5}; do
+    echo -e "${RED}💥 SYSTEM FAILURE DETECTED${NC}"
+    sleep 0.2
+    echo -e "${YELLOW} Dumping memory...${NC}"
+    sleep 0.3
+    echo -e "${RED} Kernel panic: unexpected token 'bahoot'${NC}"
+    sleep 0.3
+    clear
+  done
   echo -e "${RED} Memory dumped.${NC}"
-  sleep 2
-  echo "Just kidding 😎"
+  sleep 1
+  echo -e "${GREEN}Just kidding 😎${NC}"
 }
 
 # 🧨 Chaos mode
@@ -58,8 +104,13 @@ chaos() {
   echo -e "${CYAN}🧨 Entering chaos mode...${NC}"
   sleep 0.5
   for i in {1..20}; do
-    echo -e "${RED}ERROR $i: sanity not found${NC}"
-    sleep 0.1
+    color=$((31 + (i % 6)))
+    echo -e "\033[1;${color}mERROR $i: sanity not found${NC}"
+    sleep 0.07
+  done
+  for i in {1..10}; do
+    echo -e "\033[1;33mCHAOS LEVEL: $((RANDOM % 100))%${NC}"
+    sleep 0.05
   done
   echo -e "${CYAN}💫 Chaos complete.${NC}"
 }
@@ -67,11 +118,44 @@ chaos() {
 # 🧪 Matrix mode
 matrix() {
   echo -e "${GREEN}🧪 Entering matrix mode...${NC}"
-  for i in {1..30}; do
-    echo "$(cat /dev/urandom | tr -dc '01' | fold -w 80 | head -n 1)"
+  cols=$(tput cols)
+  rows=$(tput lines)
+  trap "tput cnorm; clear; exit" SIGINT SIGTERM
+  tput civis
+  clear
+  # Each stream has a position and length
+  local -a pos
+  local -a len
+  for ((i=0; i<cols; i++)); do
+    pos[i]=$((RANDOM % rows))
+    len[i]=$((3 + RANDOM % (rows/2)))
+  done
+  for ((frame=0; frame<200; frame++)); do
+    for ((i=0; i<cols; i++)); do
+      # Print fading trail
+      for ((j=0; j<len[i]; j++)); do
+        y=$((pos[i] - j))
+        if ((y > 0 && y <= rows)); then
+          if ((j == 0)); then
+            printf "\033[%d;%dH\033[1;97m%s\033[0m" "$y" "$((i+1))" "$(echo {a..z} {A..Z} {0..9} | tr ' ' '\n' | shuf | head -n1)"
+          elif ((j < len[i]/2)); then
+            printf "\033[%d;%dH\033[1;32m%s\033[0m" "$y" "$((i+1))" "$(echo {a..z} {A..Z} {0..9} | tr ' ' '\n' | shuf | head -n1)"
+          else
+            printf "\033[%d;%dH\033[0;32m%s\033[0m" "$y" "$((i+1))" "$(echo {a..z} {A..Z} {0..9} | tr ' ' '\n' | shuf | head -n1)"
+          fi
+        fi
+      done
+      # Move stream down
+      pos[i]=$((pos[i]+1))
+      if ((pos[i] - len[i] > rows)); then
+        pos[i]=1
+        len[i]=$((3 + RANDOM % (rows/2)))
+      fi
+    done
     sleep 0.05
   done
-  echo -e "${GREEN}🧠 Matrix exited.${NC}"
+  tput cnorm
+  echo -e "${GREEN}\n🧠 Matrix exited.${NC}"
 }
 banner() {
   local lines=(
@@ -120,9 +204,11 @@ troll() {
 party() {
   echo -e "${YELLOW}🎉 Welcome to Bahoot Party Mode!${NC}"
   for i in {1..10}; do
-    echo -e "${CYAN}🎊 🎈 🎉 Bahoot rocks! 🎉 🎈 🎊${NC}"
-    sleep 0.2
+    color=$((31 + (RANDOM % 6)))
+    echo -e "\033[1;${color}m🎊 🎈 🎉 Bahoot rocks! 🎉 🎈 🎊${NC}"
+    sleep 0.15
   done
+  echo -e "${GREEN}🎵 Party's over, back to work!${NC}"
 }
 
 # 🦠 Fake virus scan
@@ -291,26 +377,30 @@ credits() {
 # 🧼 Help menu
 help_menu() {
   echo -e "${CYAN}Bahoot CLI 🤖 — Available commands:${NC}"
-  echo "  prank          - Trigger a fake meltdown"
-  echo "  deploy         - Launch ASCII rocket"
-  echo "  chaos          - Enter chaos mode"
-  echo "  matrix         - Scroll binary like The Matrix"
-  echo "  doctor         - Run environment diagnostics"
-  echo "  banner         - Print Bahoot ASCII logo"
-  echo "  update         - Refresh CLI from GitHub"
-  echo "  self-destruct  - Delete Bahoot CLI dramatically"
-  echo "  troll          - Print fake errors"
-  echo "  party          - Celebrate with confetti"
-  echo "  scan           - Fake virus scan"
-  echo "  boot           - Simulate OS boot"
-  echo "  hack           - Fake hacking animation"
-  echo "  glitch         - Terminal distortion effect"
-  echo "  ball           - Bounce a ball around"
-  echo "  fortune        - Get a random quote"
-  echo "  echo [text]    - Repeat your input"
+  echo "  ball           - Bouncing ball with color trail"
+  echo "  banner         - Animated Bahoot ASCII logo"
+  echo "  boot           - Simulate Bahoot OS boot sequence"
+  echo "  chaos          - Print colorful chaos errors"
+  echo "  crab           - Crab rave animation"
+  echo "  credits        - Show Bahoot CLI credits"
   echo "  clear          - Clear the screen"
-  echo "  credits        - Show CLI credits"
-  echo "  help           - Show this menu"
+  echo "  deploy         - Launch ASCII rocket"
+  echo "  doctor         - Show system diagnostics"
+  echo "  duck           - Spam the terminal with ducks"
+  echo "  echo [text]    - Repeat your input with flair"
+  echo "  fortune        - Get a random fortune/quote"
+  echo "  frog           - Frog rain animation"
+  echo "  glitch         - Terminal glitch effect"
+  echo "  hack           - Fake hacking animation"
+  echo "  help           - Show this help menu"
+  echo "  matrix         - Matrix movie rain effect"
+  echo "  party          - Celebrate with confetti"
+  echo "  prank          - Fake system meltdown"
+  echo "  scan           - Fake virus scan"
+  echo "  self-destruct  - Dramatically delete Bahoot CLI"
+  echo "  squid          - Squid mode animation"
+  echo "  troll          - Print fake errors and warnings"
+  echo "  update         - Update Bahoot CLI from GitHub"
 }
 case "$1" in
   prank) prank ;;
@@ -332,6 +422,10 @@ case "$1" in
   echo) shift; echo_cmd "$@" ;;
   clear) clear_cmd ;;
   credits) credits ;;
+  squid) squid ;;
+  duck) duck ;;
+  crab) crab ;;
+  frog) frog ;;
   help|"") help_menu ;;   # no banner here
   *) help_menu ;;
 esac
