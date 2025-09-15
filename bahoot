@@ -1,83 +1,3 @@
-# 🦑 Squid mode
-squid() {
-  echo -e "${CYAN}🦑 Squid mode activated!${NC}"
-  squid_frames=(
-    "    ___\n   /   \\\n  | o o |\n   \\_-_/\n    |||\n   /|||\\\n  ( ||| )\n   \\|||/\n    vvv"
-    "    ___\n   /   \\\n  | ^ ^ |\n   \\_-_/\n    |||\n   /|||\\\n  ( ||| )\n   \\|||/\n    ^^^  "
-    "    ___\n   /   \\\n  | - - |\n   \\_u_/\n    |||\n   /|||\\\n  ( ||| )\n   \\|||/\n    ~~~"
-    "    ___\n   /   \\\n  | o o |\n   \\_-_/\n    |||\n   \\|||/\n  ( ||| )\n   /|||\\\n    ^^^  "
-  )
-  
-  for cycle in {1..3}; do
-    for frame in "${squid_frames[@]}"; do
-      clear
-      echo -e "${CYAN}$frame${NC}"
-      echo -e "\n${GREEN}~ Swimming through the depths ~${NC}"
-      sleep 0.4
-    done
-  done
-  echo -e "${CYAN}🦑 Squid out!${NC}"
-}
-
-# 🦆 Duck spam
-duck() {
-  echo -e "${YELLOW}Quack! Quack! Quack!${NC}"
-  duck_frames=(
-    "       __\n      (o >\n   \\_\\_\\)#_)\n~~~~~~~~~~~~~~~~~~~~~~~~"
-    "       __\n      (o<\n   \\_\\_\\)#_)\n~~~~~~~~~~~~~~~~~~~~~~~~"
-    "       __\n      (o >\n   \\_\\_\\)#_)  *splash*\n~~~~~~~~~~~~~~~~~~~~~~~~"
-    "       __\n      (^ >\n   \\_\\_\\)#_)\n~~~~~~~~~~~~~~~~~~~~~~~~"
-  )
-  
-  positions=(5 10 15 20 25 30 20 15 10 5)
-  
-  for cycle in {1..2}; do
-    for pos in "${positions[@]}"; do
-      clear
-      echo
-      for ((i=0; i<pos; i++)); do echo -n " "; done
-      echo -e "${YELLOW}${duck_frames[$((cycle % 4))]}${NC}"
-      echo -e "\n${GREEN}Quack! Swimming around the pond!${NC}"
-      sleep 0.3
-    done
-  done
-  echo -e "${GREEN}All ducks have swum away.${NC}"
-}
-
-# 🦀 Crab rave
-crab() {
-  echo -e "${CYAN}🦀 Crab rave started!${NC}"
-  crab_frames=(
-    "   \\o/  \\o/\n    |    |\n  _/ \\__/ \\_\n {.  \\_/  .}\n  \\._    _./\n     |  |\n    /    \\"
-    "   \\o|  |o/\n    |    |\n  _/ \\__/ \\_\n {.  \\_/  .}\n  \\._    _./\n     |  |\n    /    \\"
-    "   /o\\  /o\\\n    |    |\n  _/ \\__/ \\_\n {.  \\_/  .}\n  \\._    _./\n     |  |\n    /    \\"
-    "   |o/  \\o|\n    |    |\n  _/ \\__/ \\_\n {.  \\_/  .}\n  \\._    _./\n     |  |\n    /    \\"
-  )
-  
-  positions=(2 8 15 22 28 35 28 22 15 8 2)
-  
-  for cycle in {1..2}; do
-    for pos in "${positions[@]}"; do
-      clear
-      echo
-      for ((i=0; i<pos; i++)); do echo -n " "; done
-      echo -e "${RED}${crab_frames[$((cycle % 4))]}${NC}"
-      echo -e "\n${YELLOW}🎵 Crab rave! Moving sideways! 🎵${NC}"
-      sleep 0.4
-    done
-  done
-  echo -e "${GREEN}Crab rave ended.${NC}"
-}
-
-# 🐸 Frog rain
-frog() {
-  echo -e "${GREEN}🐸 Frog rain incoming...${NC}"
-  for i in {1..20}; do
-    echo -e "🐸" | fold -w $((RANDOM % 10 + 1))
-    sleep 0.07
-  done
-  echo -e "${CYAN}Frogs gone!${NC}"
-}
 #!/bin/bash
 set -e
 
@@ -116,7 +36,8 @@ doctor() {
   echo "✅ Terminal: $TERM"
   echo "✅ User: $USER"
   echo "✅ Host: $(hostname)"
-  echo "✅ Uptime: $(uptime -p)"
+  UPTIME=$(uptime -p 2>/dev/null || uptime)
+  echo "✅ Uptime: $UPTIME"
 }
 
 # 💥 Fake meltdown
@@ -194,6 +115,7 @@ matrix() {
   tput cnorm
   echo -e "${GREEN}\n🧠 Matrix exited.${NC}"
 }
+
 banner() {
   local lines=(
 " ______  _______ _     _  _____   _____  _______"
@@ -211,6 +133,7 @@ banner() {
     sleep 0.15
   done
 }
+
 # 🔄 Self-update
 update() {
   echo -e "${CYAN}🔄 Updating Bahoot CLI...${NC}"
@@ -292,6 +215,7 @@ glitch() {
   done
   echo "System stabilized."
 }
+
 ball() {
   tput civis  # hide cursor
   stty -echo  # disable input echoing
@@ -388,6 +312,88 @@ ball() {
     sleep 0.0635363
   done
 }
+
+# 🦑 Squid mode
+squid() {
+  echo -e "${CYAN}🦑 Squid mode activated!${NC}"
+  squid_frames=(
+    "    ___\n   /   \\\n  | o o |\n   \\_-_/\n    |||\n   /|||\\\n  ( ||| )\n   \\|||/\n    vvv"
+    "    ___\n   /   \\\n  | ^ ^ |\n   \\_-_/\n    |||\n   /|||\\\n  ( ||| )\n   \\|||/\n    ^^^  "
+    "    ___\n   /   \\\n  | - - |\n   \\_u_/\n    |||\n   /|||\\\n  ( ||| )\n   \\|||/\n    ~~~"
+    "    ___\n   /   \\\n  | o o |\n   \\_-_/\n    |||\n   \\|||/\n  ( ||| )\n   /|||\\\n    ^^^  "
+  )
+  
+  for cycle in {1..3}; do
+    for frame in "${squid_frames[@]}"; do
+      clear
+      echo -e "${CYAN}$frame${NC}"
+      echo -e "\n${GREEN}~ Swimming through the depths ~${NC}"
+      sleep 0.4
+    done
+  done
+  echo -e "${CYAN}🦑 Squid out!${NC}"
+}
+
+# 🦆 Duck spam
+duck() {
+  echo -e "${YELLOW}Quack! Quack! Quack!${NC}"
+  duck_frames=(
+    "       __\n      (o >\n   \\_\\_\\)#_)\n~~~~~~~~~~~~~~~~~~~~~~~~"
+    "       __\n      (o<\n   \\_\\_\\)#_)\n~~~~~~~~~~~~~~~~~~~~~~~~"
+    "       __\n      (o >\n   \\_\\_\\)#_)  *splash*\n~~~~~~~~~~~~~~~~~~~~~~~~"
+    "       __\n      (^ >\n   \\_\\_\\)#_)\n~~~~~~~~~~~~~~~~~~~~~~~~"
+  )
+  
+  positions=(5 10 15 20 25 30 20 15 10 5)
+  
+  for cycle in {1..2}; do
+    for pos in "${positions[@]}"; do
+      clear
+      echo
+      for ((i=0; i<pos; i++)); do echo -n " "; done
+      echo -e "${YELLOW}${duck_frames[$((cycle % 4))]}${NC}"
+      echo -e "\n${GREEN}Quack! Swimming around the pond!${NC}"
+      sleep 0.3
+    done
+  done
+  echo -e "${GREEN}All ducks have swum away.${NC}"
+}
+
+# 🦀 Crab rave
+crab() {
+  echo -e "${CYAN}🦀 Crab rave started!${NC}"
+  crab_frames=(
+    "   \\o/  \\o/\n    |    |\n  _/ \\__/ \\_\n {.  \\_/  .}\n  \\._    _./\n     |  |\n    /    \\"
+    "   \\o|  |o/\n    |    |\n  _/ \\__/ \\_\n {.  \\_/  .}\n  \\._    _./\n     |  |\n    /    \\"
+    "   /o\\  /o\\\n    |    |\n  _/ \\__/ \\_\n {.  \\_/  .}\n  \\._    _./\n     |  |\n    /    \\"
+    "   |o/  \\o|\n    |    |\n  _/ \\__/ \\_\n {.  \\_/  .}\n  \\._    _./\n     |  |\n    /    \\"
+  )
+  
+  positions=(2 8 15 22 28 35 28 22 15 8 2)
+  
+  for cycle in {1..2}; do
+    for pos in "${positions[@]}"; do
+      clear
+      echo
+      for ((i=0; i<pos; i++)); do echo -n " "; done
+      echo -e "${RED}${crab_frames[$((cycle % 4))]}${NC}"
+      echo -e "\n${YELLOW}🎵 Crab rave! Moving sideways! 🎵${NC}"
+      sleep 0.4
+    done
+  done
+  echo -e "${GREEN}Crab rave ended.${NC}"
+}
+
+# 🐸 Frog rain
+frog() {
+  echo -e "${GREEN}🐸 Frog rain incoming...${NC}"
+  for i in {1..20}; do
+    echo -e "🐸" | fold -w $((RANDOM % 10 + 1))
+    sleep 0.07
+  done
+  echo -e "${CYAN}Frogs gone!${NC}"
+}
+
 # 🍀 Fortune
 fortune() {
   quotes=("You will write bug-free code today." "Bahoot believes in you." "Your terminal is your canvas." "Don't forget to hydrate.")
@@ -439,6 +445,7 @@ help_menu() {
   echo "  troll          - Print fake errors and warnings"
   echo "  update         - Update Bahoot CLI from GitHub"
 }
+
 case "$1" in
   prank) prank ;;
   deploy) rocket ;;
@@ -455,14 +462,14 @@ case "$1" in
   hack) hack ;;
   glitch) glitch ;;
   ball) ball ;;
-  fortune) fortune ;;
-  echo) shift; echo_cmd "$@" ;;
-  clear) clear_cmd ;;
-  credits) credits ;;
   squid) squid ;;
   duck) duck ;;
   crab) crab ;;
   frog) frog ;;
+  fortune) fortune ;;
+  echo) shift; echo_cmd "$@" ;;
+  clear) clear_cmd ;;
+  credits) credits ;;
   help|"") help_menu ;;   # no banner here
   *) help_menu ;;
 esac
