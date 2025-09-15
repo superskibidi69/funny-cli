@@ -197,7 +197,7 @@ clear_cmd() {
 
 # 📜 Credits
 credits() {
-  echo -e "${CYAN}📜 Bahoot CLI was built by Seas & Copilot.${NC}"
+  echo -e "${CYAN}📜 Bahoot CLI was built by superfood.${NC}"
   echo "Inspired by chaos, crafted with shell magic."
 }
 
@@ -225,8 +225,6 @@ help_menu() {
   echo "  credits        - Show CLI credits"
   echo "  help           - Show this menu"
 }
-
-# 🎭 Subcommand handler
 case "$1" in
   prank) prank ;;
   deploy) rocket ;;
@@ -247,7 +245,12 @@ case "$1" in
   echo) shift; echo_cmd "$@" ;;
   clear) clear_cmd ;;
   credits) credits ;;
-  help|"") help_menu ;;
-  *) help_menu ;;
+  help) help_menu ;;
+  "" )
+    banner
+    echo -e "${GREEN}✅ Bahoot CLI installed successfully!${NC}"
+    help_menu
+    ;;
+  * ) help_menu ;;
 esac
 [ "$1" == "" ] && echo -e "${GREEN}✅ Bahoot CLI installed successfully!${NC}" && { banner; help_menu; }
