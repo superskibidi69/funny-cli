@@ -11,4 +11,4 @@ fi
 
 npm install -g "$REPO"
 
-echo "✅ Installed! Run 'bahoot' to get started."
+echo "✅ Installed! Run 'bahoot' to get started. if not work, idk"
