@@ -1,5 +1,35 @@
 #!/bin/bash
 set -e
+# Auto-detect available commands from case statement
+_get_commands() {
+    # Use sed to extract commands between 'case "$1" in' and 'esac'
+    sed -n '/case "\$1" in/,/esac/ {
+        /^[[:space:]]*[a-zA-Z0-9_][a-zA-Z0-9_*]*)/ {
+            s/^[[:space:]]*//
+            s/)[[:space:]]*.*//
+            s/|.*$//
+            s/\*$//
+            p
+        }
+    }' "$0" | grep -v '^[*|]$' | sort -u
+}
+# Tab completion setup - only run if being sourced for completion
+_setup_completion() {
+    local commands
+    commands=$(_get_commands)
+    
+    # Add the special commands that aren't in the case pattern
+    commands+=" help echo"
+    
+    # Get script name from BASH_SOURCE when sourced
+    local script_name=$(basename "${BASH_SOURCE[0]}")
+    complete -W "$commands" "$script_name"
+}
+# Only setup completion if script is being sourced (for completion)
+if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+    _setup_completion
+    return
+fi
 
 # OS detection
 detect_os() {
@@ -17,12 +47,6 @@ windows_fallback() {
   echo "You appear to be running in Windows CMD or PowerShell."
   echo "Please use Git Bash, WSL, or a Bash-compatible terminal."
   echo "Download Git Bash: https://git-scm.com/download/win"
-
-    # Try to run PowerShell version if available
-    if command -v powershell.exe >/dev/null 2>&1; then
-      powershell.exe -ExecutionPolicy Bypass -File "$(dirname "$0")/bahoot.ps1" "$@"
-      exit $?
-    fi
 }
 
 # 🎨 Terminal colors
