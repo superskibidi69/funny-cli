@@ -1,106 +1,6 @@
 #!/bin/bash
 set -e
 
-# Auto-detect available commands from case statement
-_get_commands() {
-    # Use sed to extract commands between 'case "$1" in' and 'esac'
-    # Use /dev/stdin to read from the piped input when sourced
-    if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
-        # When sourced, read from stdin
-        sed -n '/case "\$1" in/,/esac/ {
-            /^[[:space:]]*[a-zA-Z0-9_][a-zA-Z0-9_*]*)/ {
-                s/^[[:space:]]*//
-                s/)[[:space:]]*.*//
-                s/|.*$//
-                s/\*$//
-                p
-            }
-        }' /dev/stdin | grep -v '^[*|]$' | sort -u
-    else
-        # When executed normally, read from this script file
-        sed -n '/case "\$1" in/,/esac/ {
-            /^[[:space:]]*[a-zA-Z0-9_][a-zA-Z0-9_*]*)/ {
-                s/^[[:space:]]*//
-                s/)[[:space:]]*.*//
-                s/|.*$//
-                s/\*$//
-                p
-            }
-        }' "$0" | grep -v '^[*|]$' | sort -u
-    fi
-}
-
-# Tab completion setup (Bash only)
-_setup_completion() {
-    # Only setup completion for Bash
-    if [ -n "$BASH" ]; then
-        local commands
-        commands=$(_get_commands)
-        
-        # Add the special commands that aren't in the case pattern
-        commands+=" help echo"
-        
-        complete -W "$commands" "bahoot"
-    fi
-}
-
-# Only setup completion if script is being sourced (for completion)
-if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
-    _setup_completion
-    exit 0  # Use exit instead of return when sourced
-fi
-
-# Self-installation function
-_install_bahoot() {
-    local target_dir="$HOME/.bahoot/bin"
-    local target_path="$target_dir/bahoot"
-    
-    echo -e "${CYAN}🚀 Installing Bahoot CLI...${NC}"
-    
-    # Create directory if it doesn't exist
-    mkdir -p "$target_dir"
-    
-    # Copy this script to the target location
-    if cp "$0" "$target_path"; then
-        chmod +x "$target_path"
-        echo -e "${GREEN}✅ Bahoot CLI installed to: $target_path${NC}"
-        
-        # Add to PATH in shell config files
-        local shell_configs=("$HOME/.bashrc" "$HOME/.zshrc" "$HOME/.bash_profile")
-        local path_added=0
-        
-        for config_file in "${shell_configs[@]}"; do
-            if [[ -f "$config_file" ]]; then
-                if ! grep -q "\.bahoot/bin" "$config_file"; then
-                    echo 'export PATH="$HOME/.bahoot/bin:$PATH"' >> "$config_file"
-                    echo -e "${GREEN}✅ Added to PATH in: $config_file${NC}"
-                    path_added=1
-                fi
-            fi
-        done
-      
-        # Set up completion only for Bash
-        if [ -n "$BASH" ]; then
-            if ! grep -q "source.*bahoot" "$HOME/.bashrc" 2>/dev/null; then
-                echo "source \"$target_path\" 2>/dev/null || true" >> "$HOME/.bashrc"
-                echo -e "${GREEN}✅ Bash completion configured${NC}"
-            fi
-        fi
-        
-        echo -e "${GREEN}🎉 Installation complete! Run 'bahoot' to get started.${NC}"
-        echo -e "${YELLOW}📝 Note: Tab completion works in Bash only. Zsh users can still use all commands!${NC}"
-        
-    else
-        echo -e "${RED}❌ Installation failed${NC}"
-        return 1
-    fi
-}
-
-# Check if install command was used
-if [[ "$1" == "install" ]]; then
-    _install_bahoot
-    exit $?
-fi
 # OS detection
 detect_os() {
   case "$(uname -s)" in
@@ -428,6 +328,7 @@ party() {
   done
   echo -e "${GREEN}🎵 Party's over, back to work!${NC}"
 }
+
 # 🏓 Pong game (first to 10 wins)
 pong() {
   # Hide cursor and disable input echoing
@@ -449,6 +350,10 @@ pong() {
   local winner=""
   local paddle_char="█"
   local ball_char="●"
+  local prev_ball_x=$ball_x
+  local prev_ball_y=$ball_y
+  local quit_game=0
+  local ball_speed=0.05  # Slightly slower ball speed
   
   # Colors
   local left_color="\033[1;36m"   # Cyan
@@ -462,107 +367,176 @@ pong() {
   # Draw the initial game state
   clear
   
+  # Draw borders and initial score
+  printf "\033[0;0H"
+  printf "${score_color}Player: %-2d   CPU: %-2d${NC}\n" "$score_left" "$score_right"
+  printf "═%.0s" $(seq 1 $cols)
+  for ((y=3; y<rows-1; y++)); do
+    printf "\033[%d;0H" "$y"
+    printf " "
+    printf "\033[%d;%dH" "$y" "$cols"
+    printf " "
+  done
+  printf "\033[%d;0H" "$((rows-1))"
+  printf "═%.0s" $(seq 1 $cols)
+  printf "\033[%d;0H" "$rows"
+  printf "Use ↑/↓ to move, Q to quit"
+  
+  # Draw initial paddles
+  for ((i=0; i<paddle_height; i++)); do
+    printf "\033[%d;0H${left_color}${paddle_char}${NC}" "$((left_paddle_y + i))"
+    printf "\033[%d;%dH${right_color}${paddle_char}${NC}" "$((right_paddle_y + i))" "$((cols-1))"
+  done
+  
+  # Draw initial ball
+  printf "\033[%d;%dH${ball_color}${ball_char}${NC}" "$ball_y" "$ball_x"
+  
   # Game loop
-  while [[ $score_left -lt 10 && $score_right -lt 10 ]]; do
-    # Clear previous frame
-    printf "\033[0;0H"
-    
-    # Draw scores
-    printf "${score_color}Player: %-2d   CPU: %-2d${NC}\n" "$score_left" "$score_right"
-    echo
-    
-    # Draw top border
-    printf "═%.0s" $(seq 1 $cols)
-    echo
-    
-    # Draw playing field
-    for ((y=2; y<rows-1; y++)); do
-      # Left paddle
-      if [[ $y -ge $left_paddle_y && $y -lt $((left_paddle_y + paddle_height)) ]]; then
-        printf "${left_color}${paddle_char}${NC}"
-      else
-        printf " "
-      fi
-      
-      # Middle of the field
-      for ((x=2; x<cols-1; x++)); do
-        if [[ $x -eq $ball_x && $y -eq $ball_y ]]; then
-          printf "${ball_color}${ball_char}${NC}"
-        else
-          printf " "
-        fi
-      done
-      
-      # Right paddle
-      if [[ $y -ge $right_paddle_y && $y -lt $((right_paddle_y + paddle_height)) ]]; then
-        printf "${right_color}${paddle_char}${NC}"
-      else
-        printf " "
-      fi
-      
-      echo
-    done
-    
-    # Draw bottom border
-    printf "═%.0s" $(seq 1 $cols)
-    echo
-    printf "Use W/S to move, Q to quit"
+  while [[ $score_left -lt 10 && $score_right -lt 10 && $quit_game -eq 0 ]]; do
+    # Store previous ball position
+    prev_ball_x=$ball_x
+    prev_ball_y=$ball_y
     
     # Move ball
     ball_x=$((ball_x + ball_dx))
     ball_y=$((ball_y + ball_dy))
     
-    # Ball collision with top/bottom
-    if [[ $ball_y -le 2 || $ball_y -ge $((rows-1)) ]]; then
-      ball_dy=$(( -ball_dy ))
+    # Ball collision with top/bottom - fix sticking at edges
+    if [[ $ball_y -le 2 ]]; then
+      ball_y=3
+      ball_dy=1
+    elif [[ $ball_y -ge $((rows-1)) ]]; then
+      ball_y=$((rows-2))
+      ball_dy=-1
     fi
     
-    # Ball collision with left paddle
-    if [[ $ball_x -eq 2 && $ball_y -ge $left_paddle_y && $ball_y -lt $((left_paddle_y + paddle_height)) ]]; then
+    # Ball collision with left paddle - fix paddle "splitting"
+    if [[ $ball_x -eq 1 && $ball_y -ge $left_paddle_y && $ball_y -lt $((left_paddle_y + paddle_height)) ]]; then
       ball_dx=1
       # Adjust angle based on where the ball hit the paddle
       local hit_pos=$((ball_y - left_paddle_y))
-      if [[ $hit_pos -eq 0 ]]; then
+      if [[ $hit_pos -eq 0 || $hit_pos -eq 1 ]]; then
         ball_dy=-1
-      elif [[ $hit_pos -eq $((paddle_height-1)) ]]; then
+      elif [[ $hit_pos -eq $((paddle_height-1)) || $hit_pos -eq $((paddle_height-2)) ]]; then
         ball_dy=1
+      else
+        ball_dy=0  # Straight shot for middle hits
       fi
+      # Ensure ball doesn't get stuck in paddle
+      ball_x=2
     fi
     
-    # Ball collision with right paddle (CPU)
+    # Ball collision with right paddle (CPU) - fix paddle "splitting"
     if [[ $ball_x -eq $((cols-2)) && $ball_y -ge $right_paddle_y && $ball_y -lt $((right_paddle_y + paddle_height)) ]]; then
       ball_dx=-1
-      # Simple CPU: try to match ball position
-      if [[ $ball_y -gt $((right_paddle_y + paddle_height/2)) ]]; then
-        right_paddle_y=$((right_paddle_y + 1))
-      elif [[ $ball_y -lt $((right_paddle_y + paddle_height/2)) ]]; then
-        right_paddle_y=$((right_paddle_y - 1))
+      # Adjust angle based on where the ball hit the paddle
+      local hit_pos=$((ball_y - right_paddle_y))
+      if [[ $hit_pos -eq 0 || $hit_pos -eq 1 ]]; then
+        ball_dy=-1
+      elif [[ $hit_pos -eq $((paddle_height-1)) || $hit_pos -eq $((paddle_height-2)) ]]; then
+        ball_dy=1
+      else
+        ball_dy=0  # Straight shot for middle hits
       fi
+      # Ensure ball doesn't get stuck in paddle
+      ball_x=$((cols-3))
     fi
     
     # Score points
-    if [[ $ball_x -le 1 ]]; then
+    if [[ $ball_x -le 0 ]]; then
       score_right=$((score_right + 1))
+      # Update score display immediately
+      printf "\033[0;15H${score_color}%-2d${NC}" "$score_right"
       ball_x=$((cols/2))
       ball_y=$((rows/2))
       ball_dx=1
-      ball_dy=1
-      sleep 1
-    elif [[ $ball_x -ge $cols ]]; then
+      ball_dy=$((RANDOM % 3 - 1))  # Random initial angle
+      # Clear old ball
+      printf "\033[%d;%dH " "$prev_ball_y" "$prev_ball_x"
+      # Draw new ball
+      printf "\033[%d;%dH${ball_color}${ball_char}${NC}" "$ball_y" "$ball_x"
+      # Redraw paddles to fix any visual issues
+      for ((i=0; i<paddle_height; i++)); do
+        printf "\033[%d;0H${left_color}${paddle_char}${NC}" "$((left_paddle_y + i))"
+        printf "\033[%d;%dH${right_color}${paddle_char}${NC}" "$((right_paddle_y + i))" "$((cols-1))"
+      done
+      sleep 0.5
+      continue
+    elif [[ $ball_x -ge $((cols-1)) ]]; then
       score_left=$((score_left + 1))
+      # Update score display immediately
+      printf "\033[0;8H${score_color}%-2d${NC}" "$score_left"
       ball_x=$((cols/2))
       ball_y=$((rows/2))
       ball_dx=-1
-      ball_dy=1
-      sleep 1
+      ball_dy=$((RANDOM % 3 - 1))  # Random initial angle
+      # Clear old ball
+      printf "\033[%d;%dH " "$prev_ball_y" "$prev_ball_x"
+      # Draw new ball
+      printf "\033[%d;%dH${ball_color}${ball_char}${NC}" "$ball_y" "$ball_x"
+      # Redraw paddles to fix any visual issues
+      for ((i=0; i<paddle_height; i++)); do
+        printf "\033[%d;0H${left_color}${paddle_char}${NC}" "$((left_paddle_y + i))"
+        printf "\033[%d;%dH${right_color}${paddle_char}${NC}" "$((right_paddle_y + i))" "$((cols-1))"
+      done
+      sleep 0.5
+      continue
     fi
     
-    # Simple CPU AI - follow the ball with some imperfection
+    # Improved CPU AI - better prediction and movement
     if [[ $ball_dx -gt 0 ]]; then  # Only move when ball is coming towards CPU
-      if [[ $ball_y -gt $((right_paddle_y + paddle_height/2)) && $((RANDOM % 3)) -eq 0 ]]; then
-        right_paddle_y=$((right_paddle_y + 1))
-      elif [[ $ball_y -lt $((right_paddle_y + paddle_height/2)) && $((RANDOM % 3)) -eq 0 ]]; then
-        right_paddle_y=$((right_paddle_y - 1))
+      # Predict where the ball will be
+      local predicted_y=$ball_y
+      local steps_to_reach=$(( (cols - 2 - ball_x) / ball_dx ))
+      
+      # Calculate bounce if needed
+      if [[ $ball_dy -ne 0 ]]; then
+        for ((i=0; i<steps_to_reach; i++)); do
+          predicted_y=$((predicted_y + ball_dy))
+          if [[ $predicted_y -le 2 ]]; then
+            predicted_y=3
+            ball_dy=1
+          elif [[ $predicted_y -ge $((rows-1)) ]]; then
+            predicted_y=$((rows-2))
+            ball_dy=-1
+          fi
+        done
+      fi
+      
+      # Move CPU paddle toward predicted position with some imperfection
+      local target_y=$((predicted_y - paddle_height/2))
+      
+      # Add some randomness to make CPU beatable
+      if (( RANDOM % 5 == 0 )); then  # 20% chance of error
+        target_y=$((target_y + (RANDOM % 5 - 2)))
+      fi
+      
+      # Keep target within bounds
+      if [[ $target_y -lt 2 ]]; then
+        target_y=2
+      elif [[ $target_y -gt $((rows - paddle_height - 1)) ]]; then
+        target_y=$((rows - paddle_height - 1))
+      fi
+      
+      # Move CPU paddle
+      if [[ $target_y -lt $right_paddle_y ]]; then
+        # Move up
+        if [[ $right_paddle_y -gt 2 ]]; then
+          # Clear bottom of paddle
+          printf "\033[%d;%dH " "$((right_paddle_y + paddle_height - 1))" "$((cols-1))"
+          right_paddle_y=$((right_paddle_y - 1))
+          # Draw top of paddle
+          printf "\033[%d;%dH${right_color}${paddle_char}${NC}" "$right_paddle_y" "$((cols-1))"
+        fi
+      elif [[ $target_y -gt $right_paddle_y ]]; then
+        # Move down
+        if [[ $right_paddle_y -lt $((rows - paddle_height - 1)) ]]; then
+          # Clear top of paddle
+          printf "\033[%d;%dH " "$right_paddle_y" "$((cols-1))"
+          right_paddle_y=$((right_paddle_y + 1))
+          # Draw bottom of paddle
+          printf "\033[%d;%dH${right_color}${paddle_char}${NC}" "$((right_paddle_y + paddle_height - 1))" "$((cols-1))"
+        fi
       fi
     fi
     
@@ -579,37 +553,97 @@ pong() {
       right_paddle_y=$((rows - paddle_height - 1))
     fi
     
-    # Read input with timeout for non-blocking input
-    if read -t 0.1 -n 1 -s key; then
+    # Read input with minimal delay for responsive controls
+    local key=""
+    while read -t 0.001 -n 1 -s key; do
       case "$key" in
-        w|W) left_paddle_y=$((left_paddle_y - 2)) ;;
-        s|S) left_paddle_y=$((left_paddle_y + 2)) ;;
-        q|Q) break ;;
+        $'\033') 
+          # Handle arrow keys
+          read -t 0.001 -n 2 -s rest
+          case "$rest" in
+            "[A") # Up arrow
+              if [[ $left_paddle_y -gt 2 ]]; then
+                # Clear bottom of paddle
+                printf "\033[%d;0H " "$((left_paddle_y + paddle_height - 1))"
+                left_paddle_y=$((left_paddle_y - 1))
+                # Draw top of paddle
+                printf "\033[%d;0H${left_color}${paddle_char}${NC}" "$left_paddle_y"
+              fi
+              ;;
+            "[B") # Down arrow
+              if [[ $left_paddle_y -lt $((rows - paddle_height - 1)) ]]; then
+                # Clear top of paddle
+                printf "\033[%d;0H " "$left_paddle_y"
+                left_paddle_y=$((left_paddle_y + 1))
+                # Draw bottom of paddle
+                printf "\033[%d;0H${left_color}${paddle_char}${NC}" "$((left_paddle_y + paddle_height - 1))"
+              fi
+              ;;
+          esac
+          ;;
+        w|W) 
+          # Move left paddle up
+          if [[ $left_paddle_y -gt 2 ]]; then
+            # Clear bottom of paddle
+            printf "\033[%d;0H " "$((left_paddle_y + paddle_height - 1))"
+            left_paddle_y=$((left_paddle_y - 1))
+            # Draw top of paddle
+            printf "\033[%d;0H${left_color}${paddle_char}${NC}" "$left_paddle_y"
+          fi
+          ;;
+        s|S) 
+          # Move left paddle down
+          if [[ $left_paddle_y -lt $((rows - paddle_height - 1)) ]]; then
+            # Clear top of paddle
+            printf "\033[%d;0H " "$left_paddle_y"
+            left_paddle_y=$((left_paddle_y + 1))
+            # Draw bottom of paddle
+            printf "\033[%d;0H${left_color}${paddle_char}${NC}" "$((left_paddle_y + paddle_height - 1))"
+          fi
+          ;;
+        q|Q) 
+          quit_game=1
+          break 2  # Break out of both loops
+          ;;
       esac
+    done
+    
+    # Only redraw ball if it moved
+    if [[ $prev_ball_x -ne $ball_x || $prev_ball_y -ne $ball_y ]]; then
+      # Clear old ball position
+      printf "\033[%d;%dH " "$prev_ball_y" "$prev_ball_x"
+      # Draw new ball position
+      printf "\033[%d;%dH${ball_color}${ball_char}${NC}" "$ball_y" "$ball_x"
     fi
     
-    # Small delay to make game playable
-    sleep 0.05
+    # Small delay to make game playable (slightly slower ball)
+    sleep $ball_speed
   done
   
-  # Determine winner
-  if [[ $score_left -eq 10 ]]; then
-    winner="Player"
-  elif [[ $score_right -eq 10 ]]; then
-    winner="CPU"
-  fi
-  
-  # Display winner
+  # Clear the game screen first
   clear
-  if [[ -n "$winner" ]]; then
-    echo -e "${score_color}🏆 $winner wins! 🏆${NC}"
+  
+  # Display final results BEFORE restoring terminal settings
+  if [[ $quit_game -eq 1 ]]; then
+    echo -e "${score_color}Game quit${NC}"
+    echo -e "Final score: ${score_color}Player: $score_left   CPU: $score_right${NC}"
+  elif [[ $score_left -eq 10 ]]; then
+    echo -e "${score_color}🏆 Player wins! 🏆${NC}"
+    echo -e "Final score: ${score_color}Player: $score_left   CPU: $score_right${NC}"
+  elif [[ $score_right -eq 10 ]]; then
+    echo -e "${score_color}🏆 CPU wins! 🏆${NC}"
     echo -e "Final score: ${score_color}Player: $score_left   CPU: $score_right${NC}"
   fi
   
   # Restore terminal settings
   tput cnorm
   stty echo
+  
+  # Wait for a key press before returning
+  echo
+  read -n 1 -s -p "Press any key to continue..."
 }
+
 # 🦠 Fake virus scan with progress bar
 scan() {
   echo -e "${RED}🦠 Scanning system for viruses...${NC}"

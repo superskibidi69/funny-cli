@@ -3,7 +3,19 @@
 
 ## Linux/macOS (Bash/Zsh)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/superskibidi69/funny-cli/main/bahoot | bash -s install && source ~/.bashrc 2>/dev/null || source ~/.zshrc
+mkdir -p ~/.bahoot/bin && \
+curl -fsSL https://raw.githubusercontent.com/superskibidi69/funny-cli/main/bahoot -o ~/.bahoot/bin/bahoot && \
+chmod +x ~/.bahoot/bin/bahoot && \
+echo 'export PATH="$HOME/.bahoot/bin:$PATH"' >> ~/.bashrc && \
+source ~/.bashrc && \
+bahoot banner && bahoot
+```
+
+For Zsh, replace `.bashrc` with `.zshrc`.
+Now you can run:
+```shell
+bahoot banner
+bahoot
 ```
 
 ### Notes & Troubleshooting
