@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+
 # Auto-detect available commands from case statement
 _get_commands() {
     # Use sed to extract commands between 'case "$1" in' and 'esac'
@@ -13,7 +14,8 @@ _get_commands() {
         }
     }' "$0" | grep -v '^[*|]$' | sort -u
 }
-# Tab completion setup - only run if being sourced for completion
+
+# Tab completion setup
 _setup_completion() {
     local commands
     commands=$(_get_commands)
@@ -21,14 +23,71 @@ _setup_completion() {
     # Add the special commands that aren't in the case pattern
     commands+=" help echo"
     
-    # Get script name from BASH_SOURCE when sourced
-    local script_name=$(basename "${BASH_SOURCE[0]}")
-    complete -W "$commands" "$script_name"
+    complete -W "$commands" "bahoot"
 }
+
 # Only setup completion if script is being sourced (for completion)
 if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
     _setup_completion
     return
+fi
+
+# Self-installation function
+_install_bahoot() {
+    local target_dir="$HOME/.bahoot/bin"
+    local target_path="$target_dir/bahoot"
+    
+    echo -e "${CYAN}🚀 Installing Bahoot CLI...${NC}"
+    
+    # Create directory if it doesn't exist
+    mkdir -p "$target_dir"
+    
+    # Copy this script to the target location
+    if cp "$0" "$target_path"; then
+        chmod +x "$target_path"
+        echo -e "${GREEN}✅ Bahoot CLI installed to: $target_path${NC}"
+        
+        # Add to PATH in shell config files
+        local shell_configs=("$HOME/.bashrc" "$HOME/.zshrc" "$HOME/.bash_profile")
+        local path_added=0
+        
+        for config_file in "${shell_configs[@]}"; do
+            if [[ -f "$config_file" ]]; then
+                if ! grep -q "\.bahoot/bin" "$config_file"; then
+                    echo 'export PATH="$HOME/.bahoot/bin:$PATH"' >> "$config_file"
+                    echo -e "${GREEN}✅ Added to PATH in: $config_file${NC}"
+                    path_added=1
+                fi
+            fi
+        done
+        
+        if [[ $path_added -eq 1 ]]; then
+            echo -e "${YELLOW}📝 Please run: source ~/.bashrc (or source ~/.zshrc)${NC}"
+            echo -e "${YELLOW}📝 Or restart your terminal to start using 'bahoot' command${NC}"
+        else
+            echo -e "${YELLOW}ℹ️ PATH already configured for Bahoot CLI${NC}"
+        fi
+        
+        # Set up completion
+        if ! grep -q "source.*bahoot" "$HOME/.bashrc" 2>/dev/null && ! grep -q "source.*bahoot" "$HOME/.zshrc" 2>/dev/null; then
+            echo -e "${CYAN}🔧 Setting up tab completion...${NC}"
+            echo "source \"$target_path\"" >> "$HOME/.bashrc"
+            echo "source \"$target_path\"" >> "$HOME/.zshrc" 2>/dev/null || true
+            echo -e "${GREEN}✅ Tab completion configured${NC}"
+        fi
+        
+        echo -e "${GREEN}🎉 Installation complete! Run 'bahoot' to get started.${NC}"
+        
+    else
+        echo -e "${RED}❌ Installation failed${NC}"
+        return 1
+    fi
+}
+
+# Check if install command was used
+if [[ "$1" == "install" ]]; then
+    _install_bahoot
+    exit $?
 fi
 
 # OS detection
