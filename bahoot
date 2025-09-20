@@ -636,33 +636,48 @@ banner() {
     done
   done
 }
-
-# 🔄 Self-update with checksum verification
+# 🔄 Self-update with checksum verification - SILENT VERSION
 update() {
+  # Show minimal output only
   echo -e "${CYAN}🔄 Updating Bahoot CLI...${NC}"
   
-  # Create backup and calculate checksum
+  # Create backup silently
   local backup_file="$0.bak"
-  cp "$0" "$backup_file"
-  local old_checksum=$(md5sum "$0" | cut -d' ' -f1 2>/dev/null || md5 -q "$0" 2>/dev/null)
+  cp "$0" "$backup_file" 2>/dev/null
   
-  # Download update
-  if curl -fsSL https://raw.githubusercontent.com/superskibidi69/funny-cli/main/bahoot -o "$0.tmp"; then
-    local new_checksum=$(md5sum "$0.tmp" | cut -d' ' -f1 2>/dev/null || md5 -q "$0.tmp" 2>/dev/null)
+  # Calculate checksum silently
+  local old_checksum=""
+  if command -v md5sum >/dev/null 2>&1; then
+    old_checksum=$(md5sum "$0" 2>/dev/null | cut -d' ' -f1)
+  elif command -v md5 >/dev/null 2>&1; then
+    old_checksum=$(md5 -q "$0" 2>/dev/null)
+  fi
+  
+  # Download update with suppressed output
+  if curl -fsSL https://raw.githubusercontent.com/superskibidi69/funny-cli/main/bahoot -o "$0.tmp" 2>/dev/null; then
+    # Calculate new checksum silently
+    local new_checksum=""
+    if command -v md5sum >/dev/null 2>&1; then
+      new_checksum=$(md5sum "$0.tmp" 2>/dev/null | cut -d' ' -f1)
+    elif command -v md5 >/dev/null 2>&1; then
+      new_checksum=$(md5 -q "$0.tmp" 2>/dev/null)
+    fi
     
     # Verify checksum is different (actual update)
-    if [ "$old_checksum" != "$new_checksum" ]; then
-      chmod +x "$0.tmp"
-      mv "$0.tmp" "$0"
+    if [ -n "$new_checksum" ] && [ "$old_checksum" != "$new_checksum" ]; then
+      chmod +x "$0.tmp" 2>/dev/null
+      mv "$0.tmp" "$0" 2>/dev/null
       echo -e "${GREEN}✅ Update complete!${NC}"
+      echo -e "${YELLOW}Restart Bahoot CLI to use the new version.${NC}"
     else
-      rm "$0.tmp"
+      rm -f "$0.tmp" 2>/dev/null
       echo -e "${YELLOW}ℹ️  Already up to date.${NC}"
     fi
-    rm -f "$backup_file"
+    rm -f "$backup_file" 2>/dev/null
   else
-    echo -e "${RED}❌ Update failed. Restoring backup.${NC}"
-    mv "$backup_file" "$0"
+    echo -e "${RED}❌ Update failed. Could not download new version.${NC}"
+    echo -e "${YELLOW}Check your internet connection or try again later.${NC}"
+    rm -f "$backup_file" 2>/dev/null
   fi
 }
 
