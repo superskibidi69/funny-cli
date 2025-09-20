@@ -23,6 +23,7 @@ bahoot
 ---
 beta version of powershell, may not work:
 ```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 mkdir ~/.bahoot/bin -Force
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/superskibidi69/funny-cli/main/bahoot.ps1" -OutFile ~/.bahoot/bin/bahoot.ps1
 $profileDir = Split-Path $PROFILE -Parent
