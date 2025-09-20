@@ -1202,6 +1202,7 @@ boot() {
     "Mounting /bahoot................[ ${GREEN}OK${NC} ]"
     "Checking system integrity.......[ ${GREEN}OK${NC} ]"
     "Starting services...............[ ${GREEN}OK${NC} ]"
+    "Compiling C.....................[ ${GREEN}OK${NC} ]"
   )
   
   for msg in "${boot_messages[@]}"; do
