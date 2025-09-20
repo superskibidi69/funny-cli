@@ -1,4 +1,3 @@
-
 #!/bin/bash
 set -e
 
@@ -29,6 +28,15 @@ BLUE='\033[0;34m'
 MAGENTA='\033[0;35m'
 NC='\033[0m' # No Color
 
+loader() {
+  local i=0
+  local spin='⣷⣯⣟⡿⢿⣻⣽⣾'
+  echo -n "Loading "
+  while :; do
+    printf "\b${spin:i++%${#spin}:1}"
+    sleep 0.1
+  done
+}
 # 🚂 Enhanced SL command - Steam locomotive with multiple train types
 sl() {
   local train_type="steam"
@@ -669,21 +677,151 @@ uninstall() {
   rm -- "$0"
   echo -e "${RED}💥 BOOM!${NC}"
 }
-
-# 🎭 Troll mode with random delays
+# 🎭 Troll mode with IP API fetching and random delays
 troll() {
+  echo -e "${RED}🔍 Initializing system scan...${NC}"
+  sleep 1
+  
+  # Show loader while "fetching" data
   (loader) &
   loader_pid=$!
   sleep 2
   kill $loader_pid 2>/dev/null
   echo -e "\b \n"
   
-  messages=("Installing virus..." "Formatting disk..." "Sending your IP to Bahoot HQ..." "Just kidding 😎")
+  # Try to fetch real IP data, but have fallback fake data
+  local ip_data=""
+  if command -v curl >/dev/null 2>&1; then
+    ip_data=$(curl -s "https://ipapi.co/json/" 2>/dev/null || echo "")
+  fi
+  
+  messages=(
+    "Scanning network interfaces..."
+    "Analyzing system vulnerabilities..."
+    "Bypassing firewall protections..."
+    "Establishing secure connection to Bahoot HQ..."
+    "Downloading exploit toolkit..."
+    "Injecting payload into system memory..."
+  )
+  
   for msg in "${messages[@]}"; do
-    echo -e "${RED}$msg${NC}"
-    # Random delay between 0.1 and 0.6 seconds
-    sleep $(awk "BEGIN {print 0.1 + 0.5 * $RANDOM / 32767}")
+    echo -e "${YELLOW}$msg${NC}"
+    sleep $(awk "BEGIN {print 0.3 + 0.4 * $RANDOM / 32767}")
   done
+  
+  echo -e "${GREEN}✅ Security scan complete!${NC}"
+  echo
+  
+  # Display IP information (real or fake)
+  if [[ -n "$ip_data" ]]; then
+    # Use jq if available for proper JSON parsing, otherwise use grep/sed
+    if command -v jq >/dev/null 2>&1; then
+      local ip=$(echo "$ip_data" | jq -r '.ip // empty')
+      local city=$(echo "$ip_data" | jq -r '.city // empty')
+      local country=$(echo "$ip_data" | jq -r '.country_name // empty')
+      local isp=$(echo "$ip_data" | jq -r '.org // empty')
+    else
+      # Fallback to basic parsing
+      local ip=$(echo "$ip_data" | grep -o '"ip":"[^"]*' | head -1 | cut -d'"' -f4)
+      local city=$(echo "$ip_data" | grep -o '"city":"[^"]*' | head -1 | cut -d'"' -f4)
+      local country=$(echo "$ip_data" | grep -o '"country_name":"[^"]*' | head -1 | cut -d'"' -f4)
+      local isp=$(echo "$ip_data" | grep -o '"org":"[^"]*' | head -1 | cut -d'"' -f4)
+    fi
+    
+    # If any data is empty, use fallback
+    if [[ -z "$ip" || -z "$city" || -z "$country" || -z "$isp" ]]; then
+      use_fallback_data
+    else
+      echo -e "${CYAN}📡 Network Information:${NC}"
+      echo -e "IP Address: ${GREEN}$ip${NC}"
+      echo -e "Location: ${GREEN}$city, $country${NC}"
+      echo -e "ISP: ${GREEN}$isp${NC}"
+    fi
+  else
+    use_fallback_data
+  fi
+  
+  echo
+  sleep 1
+  
+  # More "hacking" messages
+  echo -e "${RED}🚨 CRITICAL FINDINGS:${NC}"
+  critical_messages=(
+    "Multiple open ports detected"
+    "Outdated security protocols"
+    "Unencrypted data transmission"
+    "Vulnerable to Bahoot injection"
+    "Firewall rules need updating"
+    "Suspicious activity detected"
+    "Weak password policies found"
+    "Unpatched system vulnerabilities"
+  )
+  
+  # Show 3-5 random critical findings
+  local num_findings=$((3 + RANDOM % 3))
+  for ((i=0; i<num_findings; i++)); do
+    echo -e "⚠️  ${critical_messages[$RANDOM % ${#critical_messages[@]}]}"
+    sleep 0.5
+  done
+  
+  echo
+  sleep 1
+  
+  # Final "threat" messages with more drama
+  final_messages=(
+    "Sending your browsing history to Bahoot HQ... 📡"
+    "Installing harmless surveillance cookie... 🍪"
+    "Adding your computer to Bahoot botnet... 🤖"
+    "Downloading your meme collection... 📂"
+    "Backing up your embarrassing photos... 📸"
+    "Syncing your search history with the cloud... ☁️"
+    "Analyzing your typing patterns... ⌨️"
+    "Cataloging your favorite websites... 🌐"
+  )
+  
+  # Show 4-6 random final messages
+  local num_final=$((4 + RANDOM % 3))
+  for ((i=0; i<num_final; i++)); do
+    local msg="${final_messages[$RANDOM % ${#final_messages[@]}]}"
+    echo -e "${MAGENTA}$msg${NC}"
+    sleep $(awk "BEGIN {print 0.4 + 0.3 * $RANDOM / 32767}")
+  done
+  
+  echo
+  sleep 1
+  echo -e "${GREEN}🏴‍☠️ Just kidding! Your system is safe... probably 😈${NC}"
+  echo -e "${YELLOW}This was all simulated - no actual data was sent anywhere!${NC}"
+  
+  # Add a fun fact
+  fun_facts=(
+    "Did you know: Bahoot CLI is 100% harmless fun!"
+    "Fun fact: This troll mode doesn't actually do anything malicious"
+    "Remember: Always be cautious about what you run in terminal!"
+    "Pro tip: Real hackers don't use fancy animations like this"
+    "Security note: Your actual IP is safer than you think!"
+    "FYI: This tool only displays public information available to any website"
+  )
+  
+  echo
+  echo -e "${BLUE}💡 ${fun_facts[$RANDOM % ${#fun_facts[@]}]}${NC}"
+}
+
+# Helper function for fallback data
+use_fallback_data() {
+  local fake_ips=("192.168.1." "10.0.0." "172.16.0." "203.0.113.")
+  local fake_cities=("New York" "London" "Tokyo" "Berlin" "Paris" "Sydney" "Toronto" "Singapore")
+  local fake_countries=("United States" "United Kingdom" "Japan" "Germany" "France" "Australia" "Canada" "Singapore")
+  local fake_isps=("Comcast" "Verizon" "AT&T" "Spectrum" "BT" "Deutsche Telekom" "Rogers" "Singtel")
+  
+  local ip="${fake_ips[$RANDOM % ${#fake_ips[@]}]}$((RANDOM % 255))"
+  local city="${fake_cities[$RANDOM % ${#fake_cities[@]}]}"
+  local country="${fake_countries[$RANDOM % ${#fake_countries[@]}]}"
+  local isp="${fake_isps[$RANDOM % ${#fake_isps[@]}]}"
+  
+  echo -e "${CYAN}📡 Network Information:${NC}"
+  echo -e "IP Address: ${GREEN}$ip${NC}"
+  echo -e "Location: ${GREEN}$city, $country${NC}"
+  echo -e "ISP: ${GREEN}$isp${NC}"
 }
 
 # 🎉 Party mode with ASCII fireworks
