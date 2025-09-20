@@ -1223,6 +1223,28 @@ hack() {
   done
   echo -e "${RED}🔥 Firewall breached. Just kidding.${NC}"
 }
+rocket() {
+  tput civis
+  trap "tput cnorm; stty echo; clear; exit" SIGINT SIGTERM
+
+  local cols=$(tput cols)
+  local rows=$(tput lines)
+  local x=$((cols/2))
+  local y=$((rows/2))
+  local dx=1
+  local dy=1
+  local rocket="🧼"
+
+  while true; do
+    printf "\033[${y};${x}H "
+    x=$((x + dx))
+    y=$((y + dy))
+    (( x <= 1 || x >= cols )) && dx=$(( -dx ))
+    (( y <= 1 || y >= rows )) && dy=$(( -dy ))
+    printf "\033[${y};${x}H\033[1;31m${rocket}\033[0m"
+    sleep 0.03
+  done
+}
 
 # ⚡ Glitch effect with color inversion
 glitch() {
@@ -1435,7 +1457,7 @@ help_menu() {
   printf "%-16s %s\n" "  crab" "Crab rave animation"
   printf "%-16s %s\n" "  credits" "Show Bahoot CLI credits"
   printf "%-16s %s\n" "  clear" "Clear the screen"
-  printf "%-16s %s\n" "  deploy" "Launch ASCII rocket"
+  printf "%-16s %s\n" "  clean" "Slowly clean the terminal"
   printf "%-16s %s\n" "  doctor" "Show system diagnostics"
   printf "%-16s %s\n" "  duck" "Spam the terminal with ducks"
   printf "%-16s %s\n" "  echo [text]" "Repeat your input with flair"
@@ -1555,7 +1577,7 @@ ball() {
 
 case "$1" in
   prank) prank ;;
-  deploy) rocket ;;
+  clean) rocket ;;
   chaos) chaos ;;
   matrix) matrix ;;
   doctor) doctor ;;
