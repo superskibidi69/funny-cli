@@ -60,20 +60,11 @@ _install_bahoot() {
                 fi
             fi
         done
-        
-        if [[ $path_added -eq 1 ]]; then
-            echo -e "${YELLOW}📝 Please run: source ~/.bashrc (or source ~/.zshrc)${NC}"
-            echo -e "${YELLOW}📝 Or restart your terminal to start using 'bahoot' command${NC}"
-        else
-            echo -e "${YELLOW}ℹ️ PATH already configured for Bahoot CLI${NC}"
-        fi
-        
+      
         # Set up completion
         if ! grep -q "source.*bahoot" "$HOME/.bashrc" 2>/dev/null && ! grep -q "source.*bahoot" "$HOME/.zshrc" 2>/dev/null; then
-            echo -e "${CYAN}🔧 Setting up tab completion...${NC}"
             echo "source \"$target_path\"" >> "$HOME/.bashrc"
             echo "source \"$target_path\"" >> "$HOME/.zshrc" 2>/dev/null || true
-            echo -e "${GREEN}✅ Tab completion configured${NC}"
         fi
         
         echo -e "${GREEN}🎉 Installation complete! Run 'bahoot' to get started.${NC}"
