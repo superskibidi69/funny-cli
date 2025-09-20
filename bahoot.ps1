@@ -107,7 +107,7 @@ function Prank {
         "CRITICAL_PROCESS_DIED", 
         "SYSTEM_THREAD_EXCEPTION_NOT_HANDLED",
         "IRQL_NOT_LESS_OR_EQUAL",
-        "PAGE_FAULT_IN_NONPAGED_AREA",
+        "PAGE_FAULT_IN_NONPaged_AREA",
         "DRIVER_IRQL_NOT_LESS_OR_EQUAL",
         "KMODE_EXCEPTION_NOT_HANDLED"
     )
@@ -134,7 +134,7 @@ function Chaos {
     $errors = @(
         "KERNEL_SECURITY_CHECK_FAILURE", "CRITICAL_PROCESS_DIED", 
         "SYSTEM_THREAD_EXCEPTION_NOT_HANDLED", "IRQL_NOT_LESS_OR_EQUAL",
-        "PAGE_FAULT_IN_NONPAGED_AREA", "DRIVER_IRQL_NOT_LESS_OR_EQUAL",
+        "PAGE_FAULT_IN_NONPaged_AREA", "DRIVER_IRQL_NOT_LESS_OR_EQUAL",
         "KMODE_EXCEPTION_NOT_HANDLED", "SANITY_NOT_FOUND",
         "BAHOOT_OVERFLOW", "TERMINAL_TOO_COOL"
     )
@@ -445,9 +445,8 @@ switch ($command) {
 }
 '@
 
-# Save and execute the corrected script
-$correctedScript | Out-File -FilePath "$env:TEMP\bahoot_fixed.ps1" -Encoding UTF8
-& "$env:TEMP\bahoot_fixed.ps1" help
-'@
+# Save the corrected script
+$correctedScript | Out-File -FilePath "~/.bahoot/bin/bahoot.ps1" -Encoding UTF8
 
-Invoke-Expression $correctedScript
+# Test it
+& "~/.bahoot/bin/bahoot.ps1" help
