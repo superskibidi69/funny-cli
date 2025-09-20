@@ -1,3 +1,5 @@
+# Use this corrected version that properly escapes the pipes:
+$correctedScript = @'
 #!/usr/bin/env pwsh
 
 # Terminal colors
@@ -20,14 +22,6 @@ function Detect-OS {
     } else {
         return "Unknown"
     }
-}
-
-# Windows fallback
-function Windows-Fallback {
-    Write-Host "$RED Bahoot CLI requires PowerShell 7+ or Windows Terminal. $NC" -ForegroundColor Red
-    Write-Host "You appear to be running in legacy Windows CMD or PowerShell."
-    Write-Host "Please use Windows Terminal, PowerShell 7+, or WSL."
-    Write-Host "Download Windows Terminal: https://aka.ms/terminal"
 }
 
 # Simple spinner loader
@@ -147,7 +141,7 @@ function Chaos {
     
     for ($i = 1; $i -le 30; $i++) {
         $color = 31 + ($i % 6)
-        Write-Host "`e[1;${color}mERROR $i: $(Get-Random $errors)$NC"
+        Write-Host "`e[1;${color}mERROR ${i}: $(Get-Random $errors)$NC"
         
         if ((Get-Random 5) -eq 0) {
             [System.Console]::Beep()
@@ -164,7 +158,7 @@ function Chaos {
     Write-Host "💫 Chaos complete." -ForegroundColor Cyan
 }
 
-# Banner
+# Banner - FIXED: Replaced pipe characters with alternatives
 function Banner {
     $lines = @(
         " ______  _______ _     _  _____   _____  _______",
@@ -174,6 +168,8 @@ function Banner {
     
     Clear-Host
     foreach ($line in $lines) {
+        # Replace pipes with vertical bars for PowerShell compatibility
+        $line = $line -replace '\|', '∣'
         foreach ($char in $line.ToCharArray()) {
             Write-Host $char -ForegroundColor Cyan -NoNewline
             Start-Sleep -Milliseconds 10
@@ -447,3 +443,11 @@ switch ($command) {
     "help" { Help-Menu }
     default { Help-Menu }
 }
+'@
+
+# Save and execute the corrected script
+$correctedScript | Out-File -FilePath "$env:TEMP\bahoot_fixed.ps1" -Encoding UTF8
+& "$env:TEMP\bahoot_fixed.ps1" help
+'@
+
+Invoke-Expression $correctedScript
