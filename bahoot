@@ -271,7 +271,7 @@ update() {
       echo -e "${GREEN}✅ Update complete!${NC}"
     else
       rm "$0.tmp"
-      echo -e "${YELLOW}ℹ️ Already up to date.${NC}"
+      echo -e "${YELLOW}ℹ️  Already up to date.${NC}"
     fi
     rm -f "$backup_file"
   else
