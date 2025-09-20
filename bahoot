@@ -4,15 +4,30 @@ set -e
 # Auto-detect available commands from case statement
 _get_commands() {
     # Use sed to extract commands between 'case "$1" in' and 'esac'
-    sed -n '/case "\$1" in/,/esac/ {
-        /^[[:space:]]*[a-zA-Z0-9_][a-zA-Z0-9_*]*)/ {
-            s/^[[:space:]]*//
-            s/)[[:space:]]*.*//
-            s/|.*$//
-            s/\*$//
-            p
-        }
-    }' "$0" | grep -v '^[*|]$' | sort -u
+    # Use /dev/stdin to read from the piped input when sourced
+    if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+        # When sourced, read from stdin
+        sed -n '/case "\$1" in/,/esac/ {
+            /^[[:space:]]*[a-zA-Z0-9_][a-zA-Z0-9_*]*)/ {
+                s/^[[:space:]]*//
+                s/)[[:space:]]*.*//
+                s/|.*$//
+                s/\*$//
+                p
+            }
+        }' /dev/stdin | grep -v '^[*|]$' | sort -u
+    else
+        # When executed normally, read from this script file
+        sed -n '/case "\$1" in/,/esac/ {
+            /^[[:space:]]*[a-zA-Z0-9_][a-zA-Z0-9_*]*)/ {
+                s/^[[:space:]]*//
+                s/)[[:space:]]*.*//
+                s/|.*$//
+                s/\*$//
+                p
+            }
+        }' "$0" | grep -v '^[*|]$' | sort -u
+    fi
 }
 
 # Tab completion setup (Bash only)
@@ -32,7 +47,7 @@ _setup_completion() {
 # Only setup completion if script is being sourced (for completion)
 if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
     _setup_completion
-    return 0
+    exit 0  # Use exit instead of return when sourced
 fi
 
 # Self-installation function
