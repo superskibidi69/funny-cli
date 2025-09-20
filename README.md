@@ -3,7 +3,7 @@
 
 ## Linux/macOS (Bash/Zsh)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/superskibidi69/funny-cli/main/bahoot | bash -s install && source ~/.bashrc && source source ~/.zshrc
+curl -fsSL https://raw.githubusercontent.com/superskibidi69/funny-cli/main/bahoot | bash -s install && source ~/.bashrc
 ```
 
 ### Notes & Troubleshooting

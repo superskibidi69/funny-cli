@@ -15,21 +15,24 @@ _get_commands() {
     }' "$0" | grep -v '^[*|]$' | sort -u
 }
 
-# Tab completion setup
+# Tab completion setup (Bash only)
 _setup_completion() {
-    local commands
-    commands=$(_get_commands)
-    
-    # Add the special commands that aren't in the case pattern
-    commands+=" help echo"
-    
-    complete -W "$commands" "bahoot"
+    # Only setup completion for Bash
+    if [ -n "$BASH" ]; then
+        local commands
+        commands=$(_get_commands)
+        
+        # Add the special commands that aren't in the case pattern
+        commands+=" help echo"
+        
+        complete -W "$commands" "bahoot"
+    fi
 }
 
 # Only setup completion if script is being sourced (for completion)
 if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
     _setup_completion
-    return
+    return 0
 fi
 
 # Self-installation function
@@ -61,13 +64,16 @@ _install_bahoot() {
             fi
         done
       
-        # Set up completion
-        if ! grep -q "source.*bahoot" "$HOME/.bashrc" 2>/dev/null && ! grep -q "source.*bahoot" "$HOME/.zshrc" 2>/dev/null; then
-            echo "source \"$target_path\"" >> "$HOME/.bashrc"
-            echo "source \"$target_path\"" >> "$HOME/.zshrc" 2>/dev/null || true
+        # Set up completion only for Bash
+        if [ -n "$BASH" ]; then
+            if ! grep -q "source.*bahoot" "$HOME/.bashrc" 2>/dev/null; then
+                echo "source \"$target_path\" 2>/dev/null || true" >> "$HOME/.bashrc"
+                echo -e "${GREEN}✅ Bash completion configured${NC}"
+            fi
         fi
         
         echo -e "${GREEN}🎉 Installation complete! Run 'bahoot' to get started.${NC}"
+        echo -e "${YELLOW}📝 Note: Tab completion works in Bash only. Zsh users can still use all commands!${NC}"
         
     else
         echo -e "${RED}❌ Installation failed${NC}"
@@ -80,7 +86,6 @@ if [[ "$1" == "install" ]]; then
     _install_bahoot
     exit $?
 fi
-
 # OS detection
 detect_os() {
   case "$(uname -s)" in
