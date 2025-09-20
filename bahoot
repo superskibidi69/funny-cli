@@ -424,7 +424,7 @@ sl() {
       echo "   /|\\"
       echo "  / | \\"
       echo " /  |  \\"
-      echo "Rocket train has left for space!${NC}"
+      echo -e "Rocket train has left for space!${NC}"
       ;;
     "bullet") 
       echo -e "${train_color}💨 Bullet train arrived in record time!${NC}"
@@ -433,7 +433,7 @@ sl() {
       echo -e "${ground_color}"
       echo "  📦📦📦"
       echo "  |_____|"
-      echo "Freight delivered successfully!${NC}"
+      echo -e "Freight delivered successfully!${NC}"
       ;;
     "metro")
       echo -e "${BLUE}🚇 Metro train has reached its destination!${NC}"
@@ -443,11 +443,11 @@ sl() {
       ;;
     *) 
       echo -e "${train_color}"
-      echo "    ____"
-      echo "   / [] \\"
-      echo "  |      |"
-      echo "  |______|"
-      echo "All aboard the Bahoot express!${NC}"
+      echo -e "    ____"
+      echo -e "   / [] \\"
+      echo -e "  |      |"
+      echo -e "  |______|"
+      echo -e "All aboard the Bahoot express!${NC}"
       ;;
   esac
 }
@@ -638,48 +638,40 @@ banner() {
 }
 # 🔄 Self-update with checksum verification - SILENT VERSION
 update() {
-  # Show minimal output only
-  echo -e "${CYAN}🔄 Updating Bahoot CLI...${NC}"
-  
-  # Create backup silently
   local backup_file="$0.bak"
-  cp "$0" "$backup_file" 2>/dev/null
-  
-  # Calculate checksum silently
+  cp "$0" "$backup_file" &>/dev/null
+
+  # old checksum
   local old_checksum=""
-  if command -v md5sum >/dev/null 2>&1; then
+  if command -v md5sum &>/dev/null; then
     old_checksum=$(md5sum "$0" 2>/dev/null | cut -d' ' -f1)
-  elif command -v md5 >/dev/null 2>&1; then
+  elif command -v md5 &>/dev/null; then
     old_checksum=$(md5 -q "$0" 2>/dev/null)
   fi
-  
-  # Download update with suppressed output
-  if curl -fsSL https://raw.githubusercontent.com/superskibidi69/funny-cli/main/bahoot -o "$0.tmp" 2>/dev/null; then
-    # Calculate new checksum silently
+
+  # download update silently
+  if curl -fsSL https://raw.githubusercontent.com/superskibidi69/funny-cli/main/bahoot -o "$0.tmp" &>/dev/null; then
     local new_checksum=""
-    if command -v md5sum >/dev/null 2>&1; then
+    if command -v md5sum &>/dev/null; then
       new_checksum=$(md5sum "$0.tmp" 2>/dev/null | cut -d' ' -f1)
-    elif command -v md5 >/dev/null 2>&1; then
+    elif command -v md5 &>/dev/null; then
       new_checksum=$(md5 -q "$0.tmp" 2>/dev/null)
     fi
-    
-    # Verify checksum is different (actual update)
-    if [ -n "$new_checksum" ] && [ "$old_checksum" != "$new_checksum" ]; then
-      chmod +x "$0.tmp" 2>/dev/null
-      mv "$0.tmp" "$0" 2>/dev/null
+
+    if [[ -n "$new_checksum" && "$old_checksum" != "$new_checksum" ]]; then
+      chmod +x "$0.tmp" &>/dev/null
+      mv "$0.tmp" "$0" &>/dev/null
       echo -e "${GREEN}✅ Update complete!${NC}"
-      echo -e "${YELLOW}Restart Bahoot CLI to use the new version.${NC}"
     else
-      rm -f "$0.tmp" 2>/dev/null
-      echo -e "${YELLOW}ℹ️  Already up to date.${NC}"
+      rm -f "$0.tmp" &>/dev/null
     fi
-    rm -f "$backup_file" 2>/dev/null
+    rm -f "$backup_file" &>/dev/null
   else
-    echo -e "${RED}❌ Update failed. Could not download new version.${NC}"
-    echo -e "${YELLOW}Check your internet connection or try again later.${NC}"
-    rm -f "$backup_file" 2>/dev/null
+    echo -e "${RED}❌ Update failed.${NC}"
+    rm -f "$backup_file" &>/dev/null
   fi
 }
+
 
 # 💣 uninstall with countdown
 uninstall() {
@@ -1433,7 +1425,6 @@ credits() {
     sleep 0.2
   done
 }
-# 🧼 Help menu with aligned columns - UPDATED with SL options
 help_menu() {
   echo -e "${GREEN}Bahoot CLI 🤖 — Available commands:${NC}"
   printf "%-16s %s\n" "  ball" "Bouncing ball with color trail"
@@ -1461,10 +1452,9 @@ help_menu() {
   printf "%-16s %s\n" "  pong" "Play Pong (first to 10 wins)"
   printf "%-16s %s\n" "  troll" "Print fake errors and warnings"
   printf "%-16s %s\n" "  update" "Update Bahoot CLI from GitHub"
-  printf "%-16s %s\n" "  sl" "Steam locomotive animation. Options: -freight, -tram, -metro, -rocket, -bullet"
+  printf "%-16s %s\n" "  sl" "Steam locomotive animation. Options: -freight, -tram, -metro, -rocket, -bullet, -a, -F, -r"
 }
 
-# Ball function - kept exactly as requested
 ball() {
   tput civis  # hide cursor
   stty -echo  # disable input echoing
