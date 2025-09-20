@@ -157,19 +157,15 @@ function Chaos {
     }
     Write-Host "💫 Chaos complete." -ForegroundColor Cyan
 }
-
-# Banner - FIXED: Replaced pipe characters with alternatives
 function Banner {
     $lines = @(
-        " ______  _______ _     _  _____   _____  _______",
-        " |_____] |_____| |_____| |     | |     |    |   ",
-        " |_____] |     | |     | |_____| |_____|    |   "
+        ' ______  _______ _     _  _____   _____  _______',
+        ' |_____] |_____| |_____| |     | |     |    |   ',
+        ' |_____] |     | |     | |_____| |_____|    |   '
     )
-    
+
     Clear-Host
     foreach ($line in $lines) {
-        # Replace pipes with vertical bars for PowerShell compatibility
-        $line = $line -replace '\|', '∣'
         foreach ($char in $line.ToCharArray()) {
             Write-Host $char -ForegroundColor Cyan -NoNewline
             Start-Sleep -Milliseconds 10
@@ -232,31 +228,55 @@ function Troll {
         Start-Sleep -Milliseconds (100 + (Get-Random 500))
     }
 }
-
-# Party mode
 function Party {
-    Write-Host "🎉 Welcome to Bahoot Party Mode!" -ForegroundColor Yellow
-    
-    $fireworks = @(
-        "          .     .",
-        "         / \   / \",
-        "    .---'     '     '---.",
-        "   /                     \",
-        "  (      B A H O O T      )",
-        "   \                     /",
-        "    ''--.         .--''",
-        "         '-------'"
+    $frames = @(
+        @(
+            '         *     *   *        ',
+            '      *    *  *   *    *    ',
+            '    *  *    *     *   *     ',
+            '         \   |   /          ',
+            '           \ | /            ',
+            '     * - -  *  - - *        ',
+            '           / | \            ',
+            '         /   |   \          ',
+            '    *    *   *     *   *    ',
+            '      *    *   *   *    *   '
+        ),
+        @(
+            '         *  *      *   *    ',
+            '    *   *     *   *   *     ',
+            '      *   *    *     *      ',
+            '           \  |  /          ',
+            '            \ | /           ',
+            '     * - - - * - - - *      ',
+            '            / | \           ',
+            '           /  |  \          ',
+            '      *     *   *     *     ',
+            '    *   *    *   *    *     '
+        ),
+        @(
+            '      *    *   *   *    *   ',
+            '    *   *    *     *   *    ',
+            '      *    *   *   *    *   ',
+            '         \   |   /          ',
+            '           \ | /            ',
+            '     * - -  *  - - *        ',
+            '           / | \            ',
+            '         /   |   \          ',
+            '    *   *    *     *   *    ',
+            '      *    *   *   *    *   '
+        )
     )
-    
-    for ($i = 1; $i -le 3; $i++) {
+
+    for ($i = 0; $i -lt 9; $i++) {
         Clear-Host
-        $color = 31 + (Get-Random 6)
-        $firework = $fireworks[(Get-Random $fireworks.Length)]
-        Write-Host "`e[1;${color}m$firework$NC"
-        Write-Host "`e[1;${color}m🎊 🎈 🎉 Bahoot rocks! 🎉 🎈 🎊$NC"
-        Start-Sleep -Milliseconds 300
+        foreach ($line in $frames[$i % $frames.Count]) {
+            Write-Host $line -ForegroundColor (Get-Random -InputObject @(
+                'Red','Yellow','Green','Blue','Magenta','Cyan','White'
+            ))
+        }
+        Start-Sleep -Milliseconds 250
     }
-    Write-Host "🎵 Party's over, back to work!" -ForegroundColor Green
 }
 
 # Scan function
