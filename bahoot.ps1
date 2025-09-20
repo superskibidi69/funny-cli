@@ -157,19 +157,15 @@ function Chaos {
     }
     Write-Host "💫 Chaos complete." -ForegroundColor Cyan
 }
-
-# Banner - FIXED: Replaced pipe characters with alternatives
 function Banner {
     $lines = @(
-        " ______  _______ _     _  _____   _____  _______",
-        " |_____] |_____| |_____| |     | |     |    |   ",
-        " |_____] |     | |     | |_____| |_____|    |   "
+        ' ______  _______ _     _  _____   _____  _______',
+        ' |_____] |_____| |_____| |     | |     |    |   ',
+        ' |_____] |     | |     | |_____| |_____|    |   '
     )
-    
+
     Clear-Host
     foreach ($line in $lines) {
-        # Replace pipes with vertical bars for PowerShell compatibility
-        $line = $line -replace '\|', '∣'
         foreach ($char in $line.ToCharArray()) {
             Write-Host $char -ForegroundColor Cyan -NoNewline
             Start-Sleep -Milliseconds 10
