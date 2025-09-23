@@ -684,22 +684,68 @@ uninstall() {
   rm -- "$0"
   echo -e "${RED}💥 BOOM!${NC}"
 }
-# 🎭 Troll mode with IP API fetching and random delays
+# 🎭 Troll mode with real IP detection from system and fallback to ifconfig.me
 troll() {
   echo -e "${RED}🔍 Initializing system scan...${NC}"
   sleep 1
   
   # Show loader while "fetching" data
-  (loader) &
-  loader_pid=$!
-  sleep 2
-  kill $loader_pid 2>/dev/null
-  echo -e "\b \n"
+# Show loader while "fetching" data
+(loader) &
+loader_pid=$!
+sleep 2
+kill $loader_pid 2>/dev/null
+wait $loader_pid 2>/dev/null || true   # ✅ reap quietly, no hang
+echo -e "\b \n"
+  # Try to get real IP using multiple methods
+  local ip=""
+  local city=""
+  local country=""
+  local isp=""
   
-  # Try to fetch real IP data, but have fallback fake data
-  local ip_data=""
-  if command -v curl >/dev/null 2>&1; then
-    ip_data=$(curl -s "https://ipapi.co/json/" 2>/dev/null || echo "")
+  # Method 1: Try system commands first (most reliable)
+  if command -v ip >/dev/null 2>&1; then
+    # Linux systems with ip command
+    ip=$(ip route get 1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if ($i=="src") print $(i+1)}' | head -1)
+  elif command -v ifconfig >/dev/null 2>&1; then
+    # macOS/Linux with ifconfig
+    ip=$(ifconfig 2>/dev/null | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -1)
+  fi
+  
+  # If we got a local IP, try to get public IP from external services
+  if [[ -n "$ip" && "$ip" =~ ^(10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|192\.168\.) ]]; then
+    # It's a private IP, need to get public IP from external service
+    ip=""
+  fi
+  
+  # Method 2: Try external services for public IP
+  if [[ -z "$ip" ]]; then
+    # Try multiple public IP services with timeout
+    if command -v curl >/dev/null 2>&1; then
+      # Try ifconfig.me first (simple and fast)
+      ip=$(curl -s --connect-timeout 3 "https://ifconfig.me/ip" 2>/dev/null || echo "")
+      
+      # If that fails, try ipinfo.io
+      if [[ -z "$ip" ]]; then
+        ip_data=$(curl -s --connect-timeout 3 "https://ipinfo.io/json" 2>/dev/null || echo "")
+        if [[ -n "$ip_data" ]]; then
+          ip=$(echo "$ip_data" | grep -o '"ip":"[^"]*' | head -1 | cut -d'"' -f4)
+          city=$(echo "$ip_data" | grep -o '"city":"[^"]*' | head -1 | cut -d'"' -f4)
+          country=$(echo "$ip_data" | grep -o '"country":"[^"]*' | head -1 | cut -d'"' -f4)
+          isp=$(echo "$ip_data" | grep -o '"org":"[^"]*' | head -1 | cut -d'"' -f4)
+        fi
+      fi
+      
+      # If we have IP but no other info, try to get location info
+      if [[ -n "$ip" && -z "$city" ]]; then
+        location_data=$(curl -s --connect-timeout 3 "https://ipapi.co/${ip}/json/" 2>/dev/null || echo "")
+        if [[ -n "$location_data" ]]; then
+          city=$(echo "$location_data" | grep -o '"city":"[^"]*' | head -1 | cut -d'"' -f4)
+          country=$(echo "$location_data" | grep -o '"country_name":"[^"]*' | head -1 | cut -d'"' -f4)
+          isp=$(echo "$location_data" | grep -o '"org":"[^"]*' | head -1 | cut -d'"' -f4)
+        fi
+      fi
+    fi
   fi
   
   messages=(
@@ -720,29 +766,14 @@ troll() {
   echo
   
   # Display IP information (real or fake)
-  if [[ -n "$ip_data" ]]; then
-    # Use jq if available for proper JSON parsing, otherwise use grep/sed
-    if command -v jq >/dev/null 2>&1; then
-      local ip=$(echo "$ip_data" | jq -r '.ip // empty')
-      local city=$(echo "$ip_data" | jq -r '.city // empty')
-      local country=$(echo "$ip_data" | jq -r '.country_name // empty')
-      local isp=$(echo "$ip_data" | jq -r '.org // empty')
-    else
-      # Fallback to basic parsing
-      local ip=$(echo "$ip_data" | grep -o '"ip":"[^"]*' | head -1 | cut -d'"' -f4)
-      local city=$(echo "$ip_data" | grep -o '"city":"[^"]*' | head -1 | cut -d'"' -f4)
-      local country=$(echo "$ip_data" | grep -o '"country_name":"[^"]*' | head -1 | cut -d'"' -f4)
-      local isp=$(echo "$ip_data" | grep -o '"org":"[^"]*' | head -1 | cut -d'"' -f4)
-    fi
+  if [[ -n "$ip" ]]; then
+    echo -e "${CYAN}📡 Network Information:${NC}"
+    echo -e "IP Address: ${GREEN}$ip${NC}"
     
-    # If any data is empty, use fallback
-    if [[ -z "$ip" || -z "$city" || -z "$country" || -z "$isp" ]]; then
-      use_fallback_data
-    else
-      echo -e "${CYAN}📡 Network Information:${NC}"
-      echo -e "IP Address: ${GREEN}$ip${NC}"
-      echo -e "Location: ${GREEN}$city, $country${NC}"
-      echo -e "ISP: ${GREEN}$isp${NC}"
+    # Show additional network info if available
+    if command -v ip >/dev/null 2>&1; then
+      local interface_count=$(ip link show 2>/dev/null | grep -c "^[0-9]" || echo "0")
+      echo -e "Network Interfaces: ${GREEN}$interface_count detected${NC}"
     fi
   else
     use_fallback_data
@@ -799,18 +830,13 @@ troll() {
   echo -e "${GREEN}🏴‍☠️ Just kidding! Your system is safe... probably 😈${NC}"
   echo -e "${YELLOW}This was all simulated - no actual data was sent anywhere!${NC}"
   
-  # Add a fun fact
-  fun_facts=(
-    "Did you know: Bahoot CLI is 100% harmless fun!"
-    "Fun fact: This troll mode doesn't actually do anything malicious"
-    "Remember: Always be cautious about what you run in terminal!"
-    "Pro tip: Real hackers don't use fancy animations like this"
-    "Security note: Your actual IP is safer than you think!"
-    "FYI: This tool only displays public information available to any website"
-  )
-  
-  echo
-  echo -e "${BLUE}💡 ${fun_facts[$RANDOM % ${#fun_facts[@]}]}${NC}"
+  # Add context about the IP info shown
+  if [[ -n "$ip" ]]; then
+    echo -e "${BLUE}💡 The IP information shown is your actual public IP address${NC}"
+    echo -e "${BLUE}   This is public information available to any website you visit${NC}"
+  else
+    echo -e "${BLUE}💡 Could not retrieve real IP data - showing simulated information${NC}"
+  fi
 }
 
 # Helper function for fallback data
@@ -829,6 +855,7 @@ use_fallback_data() {
   echo -e "IP Address: ${GREEN}$ip${NC}"
   echo -e "Location: ${GREEN}$city, $country${NC}"
   echo -e "ISP: ${GREEN}$isp${NC}"
+  echo -e "${YELLOW}Note: This is simulated data (real IP detection failed)${NC}"
 }
 
 # 🎉 Party mode with ASCII fireworks
