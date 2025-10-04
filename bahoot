@@ -1627,6 +1627,9 @@ case "$1" in
   echo) shift; echo_cmd "$@" ;;
   clear) clear_cmd ;;
   credits) credits ;;
-  help|"") help_menu ;;   # no banner here
-  *) help_menu ;;
+  help|"") help_menu ;;
+  *)
+    echo "Error: command '$1' not found"
+    exit 1
+    ;;
 esac
