@@ -832,7 +832,6 @@ echo -e "\b \n"
   
   # Add context about the IP info shown
   if [[ -n "$ip" ]]; then
-    echo -e "${BLUE}💡 The IP information shown is your actual public IP address${NC}"
     echo -e "${BLUE}   This is public information available to any website you visit${NC}"
   else
     echo -e "${BLUE}💡 Could not retrieve real IP data - showing simulated information${NC}"
